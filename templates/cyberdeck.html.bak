@@ -7,8 +7,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>OpenClaw CyberDeck</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cyberdeck.css') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#0a0a0f">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body>
@@ -113,10 +111,6 @@
             <button class="cmd-btn" onclick="toggleTheme()">
                 <span class="cmd-icon">🌙</span>
                 <span class="cmd-label">Theme</span>
-            </button>
-            <button class="cmd-btn" id="fullscreen-btn" onclick="toggleFullscreen()">
-                <span class="cmd-icon">⤢</span>
-                <span class="cmd-label">Full</span>
             </button>
         </section>
     </div>
@@ -324,85 +318,5 @@
         // Initial placeholder
         renderActivityFeed();
     </script>
-
-    <script>
-        // Minimal PWA/service worker registration (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('{{ url_for('static', filename='sw.js') }}')
-            .catch(()=>{/*sw register failed*/});
-        }
-
-        // Persist theme
-        try{
-            const saved = localStorage.getItem('oc_dark');
-            if (saved === 'false') {
-                document.body.className = 'light-theme';
-                darkTheme = false;
-            }
-        }catch(e){}
-
-        // Enhanced touch controls: swipe-to-dismiss activity items
-        (function(){
-            const feed = document.getElementById('activity-feed');
-            let touchStartX=0, touchStartY=0;
-            feed.addEventListener('touchstart', e=>{
-                const t = e.changedTouches[0]; touchStartX = t.clientX; touchStartY = t.clientY;
-            }, {passive:true});
-
-            feed.addEventListener('touchend', e=>{
-                const t = e.changedTouches[0];
-                const dx = t.clientX - touchStartX;
-                const dy = t.clientY - touchStartY;
-                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
-                    // find closest activity-item
-                    let el = document.elementFromPoint(t.clientX, t.clientY);
-                    while(el && !el.classList.contains('activity-item')) el = el.parentElement;
-                    if (el) {
-                        el.style.transition='transform 0.2s ease, opacity 0.2s ease';
-                        el.style.transform = `translateX(${dx>0?200:-200}px)`;
-                        el.style.opacity = '0';
-                        setTimeout(()=>{
-                            // remove from activities array
-                            const index = Array.from(feed.querySelectorAll('.activity-item')).indexOf(el);
-                            if (index>=0) activities.splice(index,1);
-                            renderActivityFeed();
-                        },220);
-                    }
-                }
-            }, {passive:true});
-        })();
-
-        // Fullscreen toggle
-        function toggleFullscreen(){
-            const el = document.documentElement;
-            if (!document.fullscreenElement) {
-                el.requestFullscreen().catch(()=>{});
-            } else {
-                document.exitFullscreen().catch(()=>{});
-            }
-        }
-
-        // Persist theme toggle
-        const oldToggle = window.toggleTheme;
-        window.toggleTheme = function(){
-            oldToggle();
-            try{ localStorage.setItem('oc_dark', darkTheme? 'true':'false'); }catch(e){}
-        }
-
-        // Animation/performance adjustments for low-power devices
-        (function(){
-            const lowPower = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) 
-                || (screen.width <= 720) || (navigator.userAgent && /PinePhone/i.test(navigator.userAgent));
-            if (lowPower) {
-                // reduce heavy animations and filters
-                document.documentElement.style.setProperty('--molty-height','200px');
-                document.querySelectorAll('.molty-svg').forEach(s=>{ s.style.animationDuration='6s'; s.style.filter='none'; s.style.willChange='transform'; });
-                document.querySelectorAll('.molty-legs').forEach(e=>e.style.animation='none');
-                document.querySelectorAll('.stars circle').forEach(c=>c.style.animation='none');
-            }
-        })();
-    </script>
-
-    <script src="{{ url_for('static', filename='js/touch.js') }}"></script>
 </body>
 </html>

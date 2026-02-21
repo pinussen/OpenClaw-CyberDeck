@@ -1,12 +1,22 @@
 """
-Cyberpunk UI module for OpenClaw Dual Display Command Center.
-Contains Molty character, activity feed, command panel, and theme effects.
+Cyberpunk UI module for OpenClaw CyberDeck Web.
+Web-compatible versions without PIL dependencies.
 """
 
-from .cyberpunk_theme import CyberpunkTheme, COLORS as CYBERPUNK_COLORS
-from .molty import Molty, MoltyState
-from .activity_feed import ActivityFeed, ActivityEntry
-from .command_panel import CommandPanel, CommandButton
+# Only export web-compatible modules
+try:
+    from .cyberpunk_theme_web import CyberpunkTheme, COLORS as CYBERPUNK_COLORS
+    from .molty_web import Molty, MoltyState
+    from .activity_feed_web import ActivityFeed, ActivityEntry
+except ImportError as e:
+    print(f"[UI] Warning: Could not import web UI modules: {e}")
+    # Fallback empty imports
+    CyberpunkTheme = None
+    CYBERPUNK_COLORS = {}
+    Molty = None
+    MoltyState = None
+    ActivityFeed = None
+    ActivityEntry = None
 
 __all__ = [
     'CyberpunkTheme',
@@ -15,6 +25,4 @@ __all__ = [
     'MoltyState',
     'ActivityFeed',
     'ActivityEntry',
-    'CommandPanel',
-    'CommandButton',
 ]

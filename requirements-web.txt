@@ -1,0 +1,9 @@
+# CyberDeck Web Server Dependencies
+flask>=2.0.0
+python-socketio>=5.0.0
+eventlet>=0.33.0
+pillow>=9.0.0
+python-dotenv>=1.0.0
+cryptography>=41.0.0
+websockets>=10.0
+pyyaml>=6.0

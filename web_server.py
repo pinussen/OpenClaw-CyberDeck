@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""
+CyberDeck Web Server - Flask + SocketIO for PinePhone interface
+Simplified version without eventlet dependency
+"""
+
+import os
+import sys
+import json
+import threading
+from datetime import datetime
+from pathlib import Path
+
+# Add parent to path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from flask import Flask, render_template, jsonify, request
+from flask_socketio import SocketIO, emit
+
+# Create Flask app
+app = Flask(__name__, template_folder='templates', static_folder='static')
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'cyberdeck-secret-key')
+
+# SocketIO with threading (no eventlet needed)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+# Demo mode display components (no PIL dependencies)
+class DemoMolty:
+    """Simplified Molty for demo mode."""
+    def __init__(self):
+        self.state = 'idle'
+    def set_state(self, state):
+        self.state = state
+    def get_state(self):
+        return self.state
+    def get_state_info(self):
+        return {"state": self.state, "label": self.state.capitalize()}
+    def render_svg(self):
+        return f'<svg viewBox="0 0 200 200"><text x="100" y="100" text-anchor="middle" fill="#00f5d4">🦞 {self.state}</text></svg>'
+
+class DemoActivityFeed:
+    """Simplified activity feed."""
+    def __init__(self):
+        self.entries = []
+    def add_entry(self, type_, title, detail="", status="done"):
+        self.entries.append({
+            "type": type_, "title": title, "detail": detail,
+            "status": status, "timestamp": datetime.now().isoformat()
+        })
+        if len(self.entries) > 50:
+            self.entries = self.entries[-50:]
+    def clear(self):
+        self.entries = []
+    def get_recent(self, limit=10):
+        return list(reversed(self.entries[-limit:]))
+
+class DemoDisplay:
+    """Simplified display."""
+    def __init__(self):
+        self.molty = DemoMolty()
+        self.activity_feed = DemoActivityFeed()
+        self._status = "Ready"
+    def add_activity(self, type_, title, detail="", status="done"):
+        self.activity_feed.add_entry(type_, title, detail, status)
+    def add_message(self, role, content):
+        self.activity_feed.add_entry("message", role, content[:50])
+    def set_molty_state(self, state):
+        self.molty.set_state(state)
+    def set_status(self, text):
+        self._status = text
+    def get_state_dict(self):
+        return {
+            "molty_state": self.molty.get_state(),
+            "status_text": self._status,
+            "activities": self.activity_feed.get_recent(20),
+            "timestamp": datetime.now().isoformat()
+        }
+
+# Global display instance
+display = DemoDisplay()
+
+# Flask Routes
+@app.route('/')
+def index():
+    return render_template('cyberdeck.html')
+
+@app.route('/api/status')
+def api_status():
+    return jsonify({
+        "connected": True,
+        "demo_mode": True,
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route('/api/display-state')
+def api_display_state():
+    return jsonify(display.get_state_dict())
+
+@app.route('/api/command', methods=['POST'])
+def api_command():
+    data = request.get_json() or {}
+    cmd = data.get('command', '')
+    
+    if cmd == 'clear':
+        display.activity_feed.clear()
+        return jsonify({"success": True, "message": "Cleared"})
+    elif cmd == 'demo':
+        import random
+        demos = [
+            ('tool', 'Search executed', 'Found 5 results'),
+            ('message', 'Assistant', 'Hello from OpenClaw!'),
+            ('status', 'Task done', 'All operations complete'),
+        ]
+        t, title, detail = random.choice(demos)
+        display.add_activity(t, title, detail)
+        display.set_molty_state(random.choice(['idle', 'working', 'success']))
+        
+        # Broadcast to all clients
+        socketio.emit('activity', {
+            'type': t, 'title': title, 'message': detail,
+            'timestamp': datetime.now().isoformat()
+        })
+        return jsonify({"success": True, "message": "Demo triggered"})
+    elif cmd == 'status':
+        return jsonify({"success": True, "status": display.get_state_dict()})
+    
+    return jsonify({"success": False, "error": f"Unknown command: {cmd}"})
+
+# SocketIO Events
+@socketio.on('connect')
+def handle_connect():
+    print(f"[Server] Client connected")
+    emit('status', {"connected": True, "demo_mode": True})
+    emit('display_state', display.get_state_dict())
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"[Server] Client disconnected")
+
+@socketio.on('command')
+def handle_command(data):
+    cmd = data.get('command') if isinstance(data, dict) else data
+    if cmd == 'get_state':
+        emit('display_state', display.get_state_dict())
+
+@socketio.on('ping')
+def handle_ping():
+    emit('pong', {'timestamp': datetime.now().isoformat()})
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', default='0.0.0.0')
+    parser.add_argument('--port', type=int, default=5000)
+    args = parser.parse_args()
+    
+    ip = args.host if args.host != '0.0.0.0' else '192.168.2.22'
+    
+    print(f"""╔══════════════════════════════════════════════════╗
+║     OpenClaw CyberDeck Web Server (DEMO)         ║
+╠══════════════════════════════════════════════════╣
+║  URL:  http://{ip}:{args.port:<5}                          ║
+║  Local: http://localhost:{args.port:<5}                       ║
+║                                                   ║
+║  PinePhone: http://{ip}:{args.port:<5}                 ║
+╚══════════════════════════════════════════════════╝""")
+    
+    socketio.run(app, host=args.host, port=args.port, debug=False, use_reloader=False, allow_unsafe_werkzeug=True)
+
+if __name__ == '__main__':
+    main()
