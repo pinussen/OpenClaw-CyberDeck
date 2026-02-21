@@ -1,0 +1,479 @@
+/* 
+ * CyberDeck Cyberpunk Theme
+ * Optimized for PinePhone (720x1440) touchscreen
+ */
+
+/* CSS Variables */
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1a1a24;
+    --border-color: #2a2a3a;
+    
+    --neon-cyan: #00f5d4;
+    --neon-pink: #ff6b9d;
+    --neon-purple: #9d4edd;
+    --neon-green: #00d9ff;
+    --neon-amber: #ff9e00;
+    --neon-red: #ff3864;
+    
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #606060;
+    
+    --header-height: 50px;
+    --molty-height: 250px;
+    --command-height: 70px;
+    
+    --font-mono: 'SF Mono', monospace;
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: var(--font-ui);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Main Layout */
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Header */
+.header {
+    height: var(--header-height);
+    background: linear-gradient(90deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--neon-red);
+    box-shadow: 0 0 8px var(--neon-red);
+    transition: all 0.3s ease;
+}
+
+.status-dot.connected {
+    background-color: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+.clock {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+/* Molty Section */
+.molty-section {
+    height: var(--molty-height);
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.molty-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 245, 212, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 107, 157, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.molty-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.molty-svg {
+    width: 180px;
+    height: 180px;
+    filter: drop-shadow(0 0 15px rgba(255, 107, 157, 0.5));
+    animation: molty-float 4s ease-in-out infinite;
+}
+
+@keyframes molty-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.molty-legs {
+    animation: legs-wiggle 0.5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes legs-wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(1deg); }
+    75% { transform: rotate(-1deg); }
+}
+
+/* State animations */
+.molty-container.working .molty-svg {
+    animation: molty-busy 0.5s ease-in-out infinite;
+}
+
+@keyframes molty-busy {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px) rotate(-2deg); }
+    75% { transform: translateX(3px) rotate(2deg); }
+}
+
+.molty-container.success .molty-svg {
+    animation: molty-success 0.6s ease-out;
+}
+
+@keyframes molty-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.molty-container.error .molty-svg {
+    animation: molty-error 0.3s ease-in-out infinite;
+}
+
+@keyframes molty-error {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.molty-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--neon-pink);
+    letter-spacing: 4px;
+    opacity: 0.7;
+}
+
+/* Stars animation */
+.stars circle {
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+.stars circle:nth-child(2) { animation-delay: 0.5s; }
+.stars circle:nth-child(3) { animation-delay: 1s; }
+.stars circle:nth-child(4) { animation-delay: 1.5s; }
+.stars circle:nth-child(5) { animation-delay: 2s; }
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Activity Section */
+.activity-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    overflow: hidden;
+}
+
+.activity-header {
+    height: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--neon-cyan);
+    letter-spacing: 1px;
+}
+
+.btn-small {
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-small:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-small:active {
+    background: var(--neon-cyan);
+    color: var(--bg-primary);
+}
+
+.activity-feed {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.activity-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.activity-item:active {
+    background: var(--border-color);
+}
+
+.activity-item.tool { border-left-color: var(--neon-cyan); }
+.activity-item.message { border-left-color: var(--neon-pink); }
+.activity-item.status { border-left-color: var(--neon-purple); }
+.activity-item.error { border-left-color: var(--neon-red); }
+.activity-item.notification { border-left-color: var(--neon-amber); }
+
+.activity-bar {
+    width: 3px;
+    height: 100%;
+    min-height: 20px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.activity-item.tool .activity-bar { background: var(--neon-cyan); }
+.activity-item.message .activity-bar { background: var(--neon-pink); }
+.activity-item.status .activity-bar { background: var(--neon-purple); }
+.activity-item.error .activity-bar { background: var(--neon-red); }
+.activity-item.notification .activity-bar { background: var(--neon-amber); }
+
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.activity-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+.activity-message {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Command Bar */
+.command-bar {
+    height: var(--command-height);
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 8px;
+    flex-shrink: 0;
+}
+
+.cmd-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 8px;
+    min-width: 60px;
+}
+
+.cmd-btn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.cmd-btn:active {
+    background: rgba(0, 245, 212, 0.1);
+    color: var(--neon-cyan);
+    transform: scale(0.95);
+}
+
+.cmd-icon {
+    font-size: 20px;
+    filter: grayscale(100%);
+    transition: filter 0.2s;
+}
+
+.cmd-btn:active .cmd-icon {
+    filter: grayscale(0%);
+}
+
+.cmd-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Light theme override */
+body.light-theme {
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f0f0f2;
+    --border-color: #e0e0e5;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a5e;
+    --text-muted: #8a8a9e;
+}
+
+body.light-theme .molty-svg {
+    filter: drop-shadow(0 0 10px rgba(255, 107, 157, 0.3));
+}
+
+/* Mobile optimizations */
+@media (max-width: 400px) {
+    .molty-svg {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .molty-section {
+        height: 200px;
+    }
+    
+    .activity-message {
+        -webkit-line-clamp: 1;
+    }
+}
+
+/* Prevent text selection on UI elements */
+.header, .command-bar, .activity-header {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+/* PinePhone / small tablet specific adjustments */
+@media (max-width: 720px) {
+    :root { --header-height: 56px; --molty-height: 220px; --command-height: 84px; }
+    .molty-svg { width: 200px; height: 200px; }
+    .cmd-btn { min-width: 72px; padding: 12px 18px; }
+    .cmd-icon { font-size: 26px; }
+    .cmd-label { font-size: 11px; }
+    .btn-small { padding: 8px 12px; font-size: 12px; }
+    .activity-item { padding: 14px; margin-bottom: 8px; }
+    .activity-message { -webkit-line-clamp: 3; }
+}
+
+/* Lower-cost visual effects by default for better CPU perf */
+.molty-svg { filter: drop-shadow(0 0 8px rgba(255, 107, 157, 0.3)); will-change: transform; }

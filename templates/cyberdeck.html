@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>OpenClaw CyberDeck</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cyberdeck.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0a0a0f">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <span class="logo">◈ OPENCLAW</span>
+                <span id="connection-status" class="status-dot disconnected"></span>
+            </div>
+            <div class="header-right">
+                <span id="clock" class="clock">--:--</span>
+            </div>
+        </header>
+
+        <!-- Molty Mascot Area -->
+        <section class="molty-section">
+            <div id="molty" class="molty-container">
+                <svg class="molty-svg" viewBox="0 0 200 200">
+                    <!-- Space Lobster body -->
+                    <defs>
+                        <linearGradient id="moltyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c44569;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Legs -->
+                    <g class="molty-legs">
+                        <path d="M60 120 L30 110" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M60 135 L25 130" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M60 150 L30 155" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M140 120 L170 110" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M140 135 L175 130" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M140 150 L170 155" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+                    </g>
+                    
+                    <!-- Claws -->
+                    <g class="molty-claws">
+                        <ellipse cx="35" cy="90" rx="20" ry="15" fill="url(#moltyGradient)" filter="url(#glow)"/>
+                        <ellipse cx="165" cy="90" rx="20" ry="15" fill="url(#moltyGradient)" filter="url(#glow)"/>
+                    </g>
+                    
+                    <!-- Body -->
+                    <ellipse cx="100" cy="130" rx="50" ry="40" fill="url(#moltyGradient)" filter="url(#glow)"/>
+                    
+                    <!-- Eyes -->
+                    <g class="molty-eyes">
+                        <circle cx="85" cy="110" r="8" fill="#00f5d4"/>
+                        <circle cx="115" cy="110" r="8" fill="#00f5d4"/>
+                        <circle cx="87" cy="108" r="3" fill="#000"/>
+                        <circle cx="117" cy="108" r="3" fill="#000"/>
+                    </g>
+                    
+                    <!-- Antennae -->
+                    <g class="molty-antennae">
+                        <path d="M80 75 Q70 40 60 20" stroke="#ff6b9d" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <path d="M120 75 Q130 40 140 20" stroke="#ff6b9d" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </g>
+                    
+                    <!-- Stars in space background -->
+                    <g class="stars">
+                        <circle cx="20" cy="30" r="1" fill="#fff" opacity="0.8"/>
+                        <circle cx="180" cy="50" r="1.5" fill="#fff" opacity="0.6"/>
+                        <circle cx="150" cy="25" r="1" fill="#fff" opacity="0.9"/>
+                        <circle cx="40" cy="60" r="1" fill="#fff" opacity="0.7"/>
+                        <circle cx="170" cy="80" r="1" fill="#fff" opacity="0.8"/>
+                    </g>
+                </svg>
+                <div class="molty-label">MOLTHE</div>
+            </div>
+        </section>
+
+        <!-- Activity Feed -->
+        <section class="activity-section">
+            <div class="activity-header">
+                <span class="section-title">▌ ACTIVITY FEED</span>
+                <button class="btn-small" onclick="clearActivity()">Clear</button>
+            </div>
+            <div id="activity-feed" class="activity-feed">
+                <div class="activity-placeholder">Waiting for OpenClaw connection...</div>
+            </div>
+        </section>
+
+        <!-- Command Bar -->
+        <section class="command-bar">
+            <button class="cmd-btn" onclick="sendCommand('status')">
+                <span class="cmd-icon">📊</span>
+                <span class="cmd-label">Status</span>
+            </button>
+            <button class="cmd-btn" onclick="sendCommand('demo')">
+                <span class="cmd-icon">🎲</span>
+                <span class="cmd-label">Demo</span>
+            </button>
+            <button class="cmd-btn" onclick="toggleTheme()">
+                <span class="cmd-icon">🌙</span>
+                <span class="cmd-label">Theme</span>
+            </button>
+            <button class="cmd-btn" id="fullscreen-btn" onclick="toggleFullscreen()">
+                <span class="cmd-icon">⤢</span>
+                <span class="cmd-label">Full</span>
+            </button>
+        </section>
+    </div>
+
+    <script>
+        // State
+        let socket = null;
+        let connected = false;
+        let activities = [];
+        
+        // DOM Elements
+        const statusDot = document.getElementById('connection-status');
+        const activityFeed = document.getElementById('activity-feed');
+        const clock = document.getElementById('clock');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            connectSocket();
+        });
+        
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            clock.textContent = now.toLocaleTimeString('sv-SE', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // SocketIO Connection
+        function connectSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('[CyberDeck] Connected');
+                connected = true;
+                statusDot.className = 'status-dot connected';
+                statusDot.title = 'Connected';
+                clearActivity();
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('[CyberDeck] Disconnected');
+                connected = false;
+                statusDot.className = 'status-dot disconnected';
+                statusDot.title = 'Disconnected';
+            });
+            
+            socket.on('activity', (data) => {
+                console.log('[CyberDeck] Activity:', data);
+                addActivity(data);
+            });
+            
+            socket.on('status', (data) => {
+                console.log('[CyberDeck] Status:', data);
+                updateStatus(data);
+            });
+            
+            socket.on('message', (data) => {
+                console.log('[CyberDeck] Message:', data);
+                handleMessage(data);
+            });
+            
+            socket.on('display_state', (data) => {
+                console.log('[CyberDeck] Display state:', data);
+                updateDisplayState(data);
+            });
+            
+            socket.on('pong', (data) => {
+                // Keep-alive response
+            });
+            
+            // Keep-alive ping every 30s
+            setInterval(() => {
+                if (socket.connected) {
+                    socket.emit('ping');
+                }
+            }, 30000);
+        }
+        
+        // Activity Feed
+        function addActivity(data) {
+            const activity = {
+                id: Date.now(),
+                type: data.type || 'info',
+                title: data.title || 'Activity',
+                message: data.message || '',
+                timestamp: data.timestamp || new Date().toISOString()
+            };
+            
+            activities.unshift(activity);
+            if (activities.length > 50) activities.pop();
+            
+            renderActivityFeed();
+        }
+        
+        function renderActivityFeed() {
+            if (activities.length === 0) {
+                activityFeed.innerHTML = '<div class="activity-placeholder">No activity yet...</div>';
+                return;
+            }
+            
+            const html = activities.slice(0, 20).map(a => {
+                const time = new Date(a.timestamp).toLocaleTimeString('sv-SE', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                return `
+                    <div class="activity-item ${a.type}">
+                        <div class="activity-bar"></div>
+                        <div class="activity-content">
+                            <div class="activity-header-row">
+                                <span class="activity-title">${escapeHtml(a.title)}</span>
+                                <span class="activity-time">${time}</span>
+                            </div>
+                            <div class="activity-message">${escapeHtml(a.message)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            activityFeed.innerHTML = html;
+        }
+        
+        function clearActivity() {
+            activities = [];
+            renderActivityFeed();
+            sendCommand('clear');
+        }
+        
+        // Commands
+        function sendCommand(command) {
+            if (!socket || !socket.connected) {
+                console.error('[CyberDeck] Not connected');
+                return;
+            }
+            
+            socket.emit('command', { command: command });
+        }
+        
+        // Status updates
+        function updateStatus(data) {
+            // Update connection status display
+            if (data.connected !== undefined) {
+                statusDot.className = data.connected ? 'status-dot connected' : 'status-dot disconnected';
+            }
+        }
+        
+        function updateDisplayState(data) {
+            if (data.activities) {
+                activities = data.activities.map((a, i) => ({
+                    id: i,
+                    type: a.type || 'info',
+                    title: a.title || 'Activity',
+                    message: a.detail || '',
+                    timestamp: a.timestamp || new Date().toISOString()
+                }));
+                renderActivityFeed();
+            }
+            
+            if (data.molty_state) {
+                updateMolty(data.molty_state);
+            }
+        }
+        
+        // Messages (from assistant)
+        function handleMessage(data) {
+            if (data.type === 'message_chunk') {
+                // Streaming content - could add to current message
+            } else if (data.type === 'message_complete') {
+                const msg = data.message;
+                addActivity({
+                    type: 'message',
+                    title: msg.role === 'assistant' ? 'OpenClaw' : 'User',
+                    message: msg.content ? msg.content.substring(0, 200) + '...' : '',
+                    timestamp: data.timestamp
+                });
+            }
+        }
+        
+        // Molty animation states
+        function updateMolty(state) {
+            const molty = document.getElementById('molty');
+            molty.className = 'molty-container ' + state.toLowerCase();
+        }
+        
+        // Theme toggle
+        let darkTheme = true;
+        function toggleTheme() {
+            darkTheme = !darkTheme;
+            document.body.className = darkTheme ? '' : 'light-theme';
+        }
+        
+        // Utility
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Initial placeholder
+        renderActivityFeed();
+    </script>
+
+    <script>
+        // Minimal PWA/service worker registration (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('{{ url_for('static', filename='sw.js') }}')
+            .catch(()=>{/*sw register failed*/});
+        }
+
+        // Persist theme
+        try{
+            const saved = localStorage.getItem('oc_dark');
+            if (saved === 'false') {
+                document.body.className = 'light-theme';
+                darkTheme = false;
+            }
+        }catch(e){}
+
+        // Enhanced touch controls: swipe-to-dismiss activity items
+        (function(){
+            const feed = document.getElementById('activity-feed');
+            let touchStartX=0, touchStartY=0;
+            feed.addEventListener('touchstart', e=>{
+                const t = e.changedTouches[0]; touchStartX = t.clientX; touchStartY = t.clientY;
+            }, {passive:true});
+
+            feed.addEventListener('touchend', e=>{
+                const t = e.changedTouches[0];
+                const dx = t.clientX - touchStartX;
+                const dy = t.clientY - touchStartY;
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+                    // find closest activity-item
+                    let el = document.elementFromPoint(t.clientX, t.clientY);
+                    while(el && !el.classList.contains('activity-item')) el = el.parentElement;
+                    if (el) {
+                        el.style.transition='transform 0.2s ease, opacity 0.2s ease';
+                        el.style.transform = `translateX(${dx>0?200:-200}px)`;
+                        el.style.opacity = '0';
+                        setTimeout(()=>{
+                            // remove from activities array
+                            const index = Array.from(feed.querySelectorAll('.activity-item')).indexOf(el);
+                            if (index>=0) activities.splice(index,1);
+                            renderActivityFeed();
+                        },220);
+                    }
+                }
+            }, {passive:true});
+        })();
+
+        // Fullscreen toggle
+        function toggleFullscreen(){
+            const el = document.documentElement;
+            if (!document.fullscreenElement) {
+                el.requestFullscreen().catch(()=>{});
+            } else {
+                document.exitFullscreen().catch(()=>{});
+            }
+        }
+
+        // Persist theme toggle
+        const oldToggle = window.toggleTheme;
+        window.toggleTheme = function(){
+            oldToggle();
+            try{ localStorage.setItem('oc_dark', darkTheme? 'true':'false'); }catch(e){}
+        }
+
+        // Animation/performance adjustments for low-power devices
+        (function(){
+            const lowPower = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) 
+                || (screen.width <= 720) || (navigator.userAgent && /PinePhone/i.test(navigator.userAgent));
+            if (lowPower) {
+                // reduce heavy animations and filters
+                document.documentElement.style.setProperty('--molty-height','200px');
+                document.querySelectorAll('.molty-svg').forEach(s=>{ s.style.animationDuration='6s'; s.style.filter='none'; s.style.willChange='transform'; });
+                document.querySelectorAll('.molty-legs').forEach(e=>e.style.animation='none');
+                document.querySelectorAll('.stars circle').forEach(c=>c.style.animation='none');
+            }
+        })();
+    </script>
+</body>
+</html>
