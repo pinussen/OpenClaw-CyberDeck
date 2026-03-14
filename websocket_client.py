@@ -150,6 +150,11 @@ class OpenClawWebSocketClient:
             "current_task": "Idle",
             "is_streaming": False,
         }
+        # Agent activity cache (for UI status)
+        self._activity_cache_path = Path.home() / ".openclaw" / "agent_activity_cache.json"
+        self._activity_cache: Dict[str, int] = {}
+        self._activity_last_write = 0.0
+        self._load_activity_cache()
 
         # Session tracking
         self._session_id: Optional[str] = None
@@ -170,6 +175,47 @@ class OpenClawWebSocketClient:
     def _get_keys_path(self) -> Path:
         """Get path for storing device keys."""
         return Path.home() / ".openclaw_display_keys.json"
+
+    def _load_activity_cache(self):
+        try:
+            if self._activity_cache_path.exists():
+                with open(self._activity_cache_path) as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        self._activity_cache = data
+        except Exception:
+            self._activity_cache = {}
+
+    def _save_activity_cache(self):
+        try:
+            tmp = self._activity_cache_path.with_suffix(".json.tmp")
+            with open(tmp, "w") as f:
+                json.dump(self._activity_cache, f)
+            tmp.replace(self._activity_cache_path)
+            self._activity_last_write = time.time()
+        except Exception:
+            pass
+
+    def _touch_agent_activity(self, agent_id: Optional[str]):
+        if not agent_id:
+            agent_id = "main"
+        ts = int(time.time())
+        self._activity_cache[agent_id] = ts
+        if time.time() - self._activity_last_write > 2.0:
+            self._save_activity_cache()
+
+    def _get_agent_id_from_payload(self, payload: Dict, data: Dict) -> Optional[str]:
+        for key in ("agentId", "agent_id", "agent"):
+            val = payload.get(key) if isinstance(payload, dict) else None
+            if isinstance(val, str):
+                return val
+            if isinstance(val, dict) and isinstance(val.get("id"), str):
+                return val.get("id")
+        if isinstance(data, dict):
+            val = data.get("agentId") or data.get("agent_id")
+            if isinstance(val, str):
+                return val
+        return None
 
     def _load_or_generate_keys(self):
         """Load existing keys or generate new ones."""
@@ -476,7 +522,8 @@ class OpenClawWebSocketClient:
                 scopes=scopes,
                 token=token,
             )
-            print(f"[WebSocket] Auth payload: {auth_payload}")
+            safe_payload = auth_payload.replace(token, '***') if token else auth_payload
+            print(f"[WebSocket] Auth payload: {safe_payload}")
             signature = self._sign_challenge(auth_payload)
             connect_params["device"] = {
                 "id": self._device_id,
@@ -507,7 +554,14 @@ class OpenClawWebSocketClient:
         }
 
         await ws.send(json.dumps(connect_msg))
-        print(f"[WebSocket] Sent connect request: {json.dumps(connect_params, indent=2)}")
+        safe_connect_params = dict(connect_params)
+        if 'auth' in safe_connect_params:
+            safe_connect_params['auth'] = {'token': '***'}
+        if 'device' in safe_connect_params and isinstance(safe_connect_params['device'], dict):
+            safe_connect_params['device'] = dict(safe_connect_params['device'])
+            if safe_connect_params['device'].get('signature'):
+                safe_connect_params['device']['signature'] = '***'
+        print(f"[WebSocket] Sent connect request: {json.dumps(safe_connect_params, indent=2)}")
 
         # Wait for connect response
         try:
@@ -752,6 +806,8 @@ class OpenClawWebSocketClient:
             stream = payload.get("stream", "")
             data = payload.get("data", {})
             run_id = payload.get("runId", "unknown")
+            agent_id = self._get_agent_id_from_payload(payload, data)
+            self._touch_agent_activity(agent_id)
 
             if stream == "lifecycle":
                 phase = data.get("phase", "")
@@ -833,6 +889,8 @@ class OpenClawWebSocketClient:
             state = payload.get("state", "")
             message = payload.get("message", {})
             run_id = payload.get("runId", "unknown")
+            agent_id = self._get_agent_id_from_payload(payload, message if isinstance(message, dict) else {})
+            self._touch_agent_activity(agent_id)
 
             if state == "final":
                 # Message complete

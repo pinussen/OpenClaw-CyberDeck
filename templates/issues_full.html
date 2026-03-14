@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Issues</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #0a0a0a;
+            --card: rgba(255,255,255,0.05);
+            --text: #e0e0e0;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .logo {
+            font-size: 2em;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo:hover { opacity: 0.8; }
+        
+        h1 { color: var(--primary); font-size: 1.8em; margin-left: 20px; }
+        
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        
+        .btn:hover { opacity: 0.9; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,255,136,0.2);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filters select, .filters input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,255,136,0.5);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: #fff;
+            font-family: inherit;
+        }
+        
+        .issues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+        }
+        
+        .issue-card {
+            background: var(--card);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .issue-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .issue-card.todo { border-left: 4px solid #ff9800; }
+        .issue-card.in_progress { border-left: 4px solid #2196f3; }
+        .issue-card.blocked { border-left: 4px solid #f44336; }
+        .issue-card.review { border-left: 4px solid #9c27b0; }
+        .issue-card.done { border-left: 4px solid #4caf50; }
+        .issue-card.cancelled { border-left: 4px solid #9e9e9e; }
+        
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .issue-key {
+            background: var(--primary);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .issue-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .issue-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        
+        .issue-labels {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .issue-label {
+            background: rgba(0,255,136,0.1);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="logo">🦾</a>
+            <h1>🦾 Issues Manager</h1>
+            <a href="/dashboard" class="btn">Dashboard</a>
+        </div>
+        
+        <div id="loading" class="loading">Loading issues...</div>
+        
+        <div id="issues" class="issues-grid"></div>
+    </div>
+    
+    <script>
+        // Show loading initially
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('issues').style.display = 'none';
+        
+        async function loadIssues() {
+            try {
+                const res = await fetch('/api/issues');
+                const data = await res.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (!data.ok) {
+                    document.getElementById('issues').innerHTML = 
+                        '<div class="empty-state">❌ Error loading issues</div>';
+                    return;
+                }
+                
+                const issues = data.issues || [];
+                
+                if (issues.length === 0) {
+                    document.getElementById('issues').innerHTML = 
+                        '<div class="empty-state">📭 No issues found</div>';
+                    return;
+                }
+                
+                const issuesContainer = document.getElementById('issues');
+                issuesContainer.style.display = 'grid';
+                
+                issuesContainer.innerHTML = issues.map(issue => `
+                    <div class="issue-card ${issue.status}" onclick="window.location.href='/issues#${issue.key}'">
+                        <div class="issue-header">
+                            <span class="issue-key">${issue.key}</span>
+                        </div>
+                        <div class="issue-title">${escapeHtml(issue.title)}</div>
+                        <div class="issue-meta">
+                            <span>📍 ${issue.status}</span>
+                            <span>⭐ ${issue.priority}</span>
+                        </div>
+                        ${issue.labels && issue.labels.length > 0 ? `
+                            <div class="issue-labels">
+                                ${issue.labels.map(l => `<span class="issue-label">${escapeHtml(l)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading issues:', error);
+                document.getElementById('loading').innerHTML = 
+                    '<div class="empty-state">❌ Error: ' + escapeHtml(error.message) + '</div>';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load on init
+        document.addEventListener('DOMContentLoaded', loadIssues);
+    </script>
+</body>
+</html>

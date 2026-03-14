@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - OpenClaw</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #00ff88;
+        }
+        
+        .header h1 {
+            color: #00ff88;
+            font-size: 2em;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .refresh-btn {
+            background: #00ff88;
+            color: #0a0a0a;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            background: #00cc6a;
+            transform: scale(1.05);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .stat-label {
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border: 1px solid #00ff88;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .issues-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .issue-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .issue-card:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+            transform: translateX(5px);
+        }
+        
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .issue-key {
+            background: #00ff88;
+            color: #0a0a0a;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .issue-title {
+            font-size: 1.2em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .issue-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+            color: #888;
+        }
+        
+        .priority {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .priority-high {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .priority-medium {
+            background: #ffaa00;
+            color: #000;
+        }
+        
+        .priority-low {
+            background: #00ff88;
+            color: #000;
+        }
+        
+        .status {
+            padding: 3px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+        
+        .status-todo {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .status-in_progress {
+            background: #00aa88;
+            color: #fff;
+        }
+        
+        .status-blocked {
+            background: #ff8800;
+            color: #fff;
+        }
+        
+        .status-done {
+            background: #00ff88;
+            color: #000;
+        }
+        
+        .labels {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .label {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦾 Issues</h1>
+            <button class="refresh-btn" onclick="loadIssues()">↻ Uppdatera</button>
+        </div>
+        
+        <div class="stats-grid" id="stats">
+            <!-- Statistics will be loaded here -->
+        </div>
+        
+        <div class="filters">
+            <select class="filter-select" id="statusFilter" onchange="loadIssues()">
+                <option value="">All Status</option>
+                <option value="todo">Todo</option>
+                <option value="in_progress">In Progress</option>
+                <option value="blocked">Blocked</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="onhold">On Hold</option>
+                <option value="waiting">Waiting</option>
+            </select>
+            
+            <select class="filter-select" id="priorityFilter" onchange="loadIssues()">
+                <option value="">All Priority</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+        
+        <div class="issues-list" id="issuesList">
+            <div class="loading pulse">Laddar issues...</div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadIssues() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            try {
+                let url = `/api/issues?limit=50`;
+                if (statusFilter) {
+                    url += `&status=${statusFilter}`;
+                }
+                if (priorityFilter) {
+                    url += `&priority=${priorityFilter}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.ok) {
+                    renderIssues(data.issues);
+                    renderStats(data.stats);
+                } else {
+                    document.getElementById('issuesList').innerHTML = 
+                        `<div class="empty-state">❌ Failed to load: ${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('issuesList').innerHTML = 
+                    `<div class="empty-state">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        function renderIssues(issues) {
+            const container = document.getElementById('issuesList');
+            
+            if (issues.length === 0) {
+                container.innerHTML = '<div class="empty-state">📭 Inga issues hittades</div>';
+                return;
+            }
+            
+            container.innerHTML = issues.map(issue => {
+                const statusClass = `status-${issue.status.replace('_', '-')}`;
+                const priorityClass = `priority-${issue.priority}`;
+                
+                return `
+                    <div class="issue-card" onclick="showIssue('${issue.key}')">
+                        <div class="issue-header">
+                            <span class="issue-key">${issue.key}</span>
+                            <span class="status ${statusClass}">${issue.status}</span>
+                        </div>
+                        <div class="issue-title">${escapeHtml(issue.title)}</div>
+                        <div class="issue-meta">
+                            <span>👤 ${issue.reporter || 'system'}</span>
+                            <span>⏱ ${new Date(issue.created_at).toLocaleString('sv-SE')}</span>
+                            <span class="priority ${priorityClass}">${issue.priority}</span>
+                            ${issue.assignee_agent ? `<span>🤖 @${issue.assignee_agent}</span>` : ''}
+                        </div>
+                        ${issue.labels && issue.labels.length > 0 ? `
+                            <div class="labels">
+                                ${issue.labels.map(l => `<span class="label">${l}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderStats(stats) {
+            const container = document.getElementById('stats');
+            const statusNames = {
+                'todo': 'To Do',
+                'in_progress': 'Pågående',
+                'blocked': ' blockerad',
+                'review': 'Review',
+                'done': 'Klar',
+                'cancelled': 'Avbruten',
+                'onhold': 'På håll',
+                'waiting': 'Väntar'
+            };
+            
+            container.innerHTML = Object.entries(stats).map(([status, count]) => `
+                <div class="stat-card">
+                    <div class="stat-number">${count}</div>
+                    <div class="stat-label">${statusNames[status] || status}</div>
+                </div>
+            `).join('');
+        }
+        
+        function showIssue(key) {
+            window.open(`/api/issues/${key}`, '_blank');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadIssues);
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadIssues, 30000);
+    </script>
+</body>
+</html>

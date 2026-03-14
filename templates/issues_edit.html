@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redigera Ärende</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #0a0a0a;
+            --card: rgba(255,255,255,0.05);
+            --text: #e0e0e0;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .logo:hover { opacity: 0.8; }
+        
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-save {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .btn-save:hover { opacity: 0.9; }
+        
+        .btn-back {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .btn-back:hover {
+            background: rgba(0,255,136,0.1);
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .issue-header {
+            background: var(--card);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .issue-key {
+            background: var(--primary);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .issue-title {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-group label {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,255,136,0.5);
+            border-radius: 5px;
+            padding: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .events-section {
+            margin-top: 30px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .events-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .event-item {
+            background: var(--card);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .event-type {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .event-content {
+            color: #fff;
+            padding-left: 10px;
+            border-left: 2px solid var(--primary);
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .add-comment {
+            margin-top: 15px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .add-comment textarea {
+            min-height: 80px;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .error {
+            background: rgba(255,0,0,0.1);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        .success {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="logo">🦾</a>
+            <a href="/issues" class="btn-back">← Tillbaka</a>
+        </div>
+        
+        <div id="loading" class="loading">Laddar ärende...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+        
+        <div id="editForm" style="display: none;">
+            <div class="issue-header">
+                <span class="issue-key" id="editKey"></span>
+                <div class="form-group">
+                    <label for="editTitle">Rubrik</label>
+                    <input type="text" id="editTitle" placeholder="Ärendets rubrik">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editStatus">Status</label>
+                        <select id="editStatus">
+                            <option value="todo">To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="blocked">Blocked</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPriority">Prioritet</label>
+                        <select id="editPriority">
+                            <option value="low">Låg</option>
+                            <option value="medium" selected>Medel</option>
+                            <option value="high">Hög</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAssignee">Tilldelad</label>
+                    <select id="editAssignee">
+                        <option value="">Obokad</option>
+                        <option value="axel">Axel</option>
+                        <option value="bytesmeden">ByteSmeden</option>
+                        <option value="archistrukt">Archistrukt</option>
+                        <option value="orion">Orion</option>
+                        <option value="testvakten">Testvakten</option>
+                        <option value="research">Research</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLabels">Etiketter (komma-separerade)</label>
+                    <input type="text" id="editLabels" placeholder="claw, agent, bug">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDescription">Beskrivning</label>
+                    <textarea id="editDescription" placeholder="Beskriv ärendet..."></textarea>
+                </div>
+                
+                <button class="btn-save" onclick="saveIssue()">💾 Spara ändringar</button>
+            </div>
+            
+            <div class="events-section">
+                <h3>📝 Händelser & Kommentarer</h3>
+                <div class="events-list" id="events">
+                    <div class="empty-state">Laddar...</div>
+                </div>
+                
+                <div class="add-comment">
+                    <h3 style="color: var(--primary); margin: 15px 0 10px;">➕ Lägg till kommentar</h3>
+                    <div class="form-group">
+                        <textarea id="addComment" placeholder="Skriv din kommentar här..."></textarea>
+                    </div>
+                    <button class="btn-save" onclick="addComment()">💬 Publicera kommentar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const issueKey = window.location.pathname.split('/').filter(Boolean)[1];
+        
+        async function loadIssue() {
+            try {
+                const res = await fetch(`/api/issues/${issueKey}`);
+                const data = await res.json();
+                
+                if (!data.ok) {
+                    showError('Ärende hittades inte');
+                    return;
+                }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+                
+                const issue = data.issue;
+                
+                document.getElementById('editKey').textContent = issueKey;
+                document.getElementById('editTitle').value = issue.title || '';
+                document.getElementById('editStatus').value = issue.status || 'todo';
+                document.getElementById('editPriority').value = issue.priority || 'medium';
+                document.getElementById('editAssignee').value = issue.assignee_agent || '';
+                document.getElementById('editLabels').value = issue.labels?.join(', ') || '';
+                document.getElementById('editDescription').value = issue.description || '';
+                
+                renderEvents(issue.events || []);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('editForm').style.display = 'block';
+                
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        }
+        
+        function renderEvents(events) {
+            const container = document.getElementById('events');
+            
+            if (events.length === 0) {
+                container.innerHTML = '<div class="empty-state">📭 Inga händelser än</div>';
+                return;
+            }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+            
+            container.innerHTML = events.map(event => {
+                // Show edit/delete buttons only for comments
+                const isComment = event.type === 'comment';
+                const id = event.id || event.event_id || null;
+                
+                let actions = '';
+                if (isComment && id) {
+                    actions = `
+                        <div class="event-actions">
+                            <button class="btn-edit" onclick="editComment(${id})">✏️ Redigera</button>
+                            <button class="btn-delete" onclick="deleteComment(${id})">🗑️ Radera</button>
+                        </div>
+                    `;
+                }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+                
+                return `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <span class="event-type">${escapeHtml(event.type)}</span>
+                            <span>${formatDate(event.created_at)}</span>
+                        </div>
+                        <div class="event-content">${escapeHtml(event.content)}</div>
+                        ${actions}
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function saveIssue() {
+            const updates = {
+                title: document.getElementById('editTitle').value,
+                status: document.getElementById('editStatus').value,
+                priority: document.getElementById('editPriority').value,
+                assignee_agent: document.getElementById('editAssignee').value,
+                labels: document.getElementById('editLabels').value.split(',').map(l => l.trim()).filter(l => l),
+                description: document.getElementById('editDescription').value
+            };
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Ärende uppdaterat!');
+                    setTimeout(() => loadIssue(), 1000);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        }
+        
+        async function addComment() {
+            const comment = document.getElementById('addComment').value.trim();
+            
+            if (!comment) {
+                alert('Skriv en kommentar först!');
+                return;
+            }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/comment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    document.getElementById('addComment').value = '';
+                    showSuccess('Kommentar tillagd!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        }
+        
+        function showSuccess(message) {
+            const el = document.getElementById('success');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        function showError(message) {
+            const el = document.getElementById('error');
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleString('sv-SE');
+        }
+        
+        async function editComment(eventId) {
+            const newComment = prompt('Skriv ny kommentar:');
+            if (!newComment || newComment.trim() === '') return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/edit', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newComment.trim() })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar uppdaterad!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) return;
+            
+            try {
+                const res = await fetch('/api/issues/${issueKey}/comment/' + eventId + '/delete', {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showSuccess('Kommentar borttagen!');
+                    setTimeout(() => loadIssue(), 500);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+        
+        loadIssue();
+    </script>
+</body>
+</html>

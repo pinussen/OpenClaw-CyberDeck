@@ -1,21 +1,24 @@
 #!/bin/bash
-# Quick start script for CyberDeck Web
+# Start CyberDeck web server
 
-cd "$(dirname "$0")"
+cd ~/.openclaw/workspace-dev/cyberdeck
 
-export FLASK_ENV=development
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+# Activate venv
+source .venv/bin/activate
 
-# Use venv Python
-if [ -f .venv/bin/python ]; then
-    PYTHON=".venv/bin/python"
-else
-    PYTHON="python3"
-fi
-
+# Start server
 echo "Starting CyberDeck Web Server..."
-echo "Access: http://192.168.2.22:5000"
-echo "Local:  http://localhost:5000"
+echo "URL: http://localhost:5000"
+echo ""
+echo "Available endpoints:"
+echo "  /                    - Main UI"
+echo "  /issues              - Issues manager"
+echo "  /dashboard           - Issues dashboard"
+echo "  /api/activities      - Activity feed"
+echo "  /api/queue           - Queue status"
+echo "  /api/issues          - Issues API"
+echo ""
+echo "Press Ctrl+C to stop"
 echo ""
 
-$PYTHON web_server.py "$@"
+python3 web_server_fixed.py --live --port 5000

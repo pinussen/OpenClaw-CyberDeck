@@ -1,10 +1,1 @@
-const CACHE_NAME = 'oc-static-v1';
-const ASSETS = ['/', '/static/css/cyberdeck.css'];
-self.addEventListener('install', e=>{
-  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e=>{ e.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', e=>{
-  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
-});
+const CACHE_NAME="oc-static-v1";const ASSETS=["/","/static/css/cyberdeck.css"];self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));self.skipWaiting()});self.addEventListener("activate",e=>{e.waitUntil(self.clients.claim())});self.addEventListener("fetch",e=>{if(e.request.url.includes("/api/")){e.respondWith(fetch(e.request));return}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - OpenClaw</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            margin: 0;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #00ff88;
+        }
+        h1 { color: #00ff88; font-size: 2em; }
+        .refresh-btn {
+            background: #00ff88;
+            color: #0a0a0a;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border: 1px solid #00ff88;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .issues-list { display: flex; flex-direction: column; gap: 10px; }
+        .issue-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+        }
+        .issue-card:hover {
+            background: rgba(0,255,136,0.15);
+            border-color: #00ff88;
+        }
+        .issue-key {
+            background: #00ff88;
+            color: #0a0a0a;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .issue-title { font-size: 1.1em; color: #fff; margin-bottom: 8px; }
+        .issue-meta { display: flex; gap: 15px; font-size: 0.9em; color: #888; }
+        .status {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+        .status-todo { background: #ff4444; color: #fff; }
+        .status-in_progress { background: #00aa88; color: #fff; }
+        .status-blocked { background: #ff8800; color: #fff; }
+        .status-done { background: #00ff88; color: #000; }
+        .priority {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .priority-high { background: #ff4444; color: #fff; }
+        .priority-medium { background: #ffaa00; color: #000; }
+        .priority-low { background: #00ff88; color: #000; }
+        .labels { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; }
+        .label { background: rgba(0,255,136,0.2); color: #00ff88; padding: 2px 6px; border-radius: 2px; font-size: 0.8em; }
+        .loading { text-align: center; color: #00ff88; padding: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦾 Issues</h1>
+            <button class="refresh-btn" onclick="loadIssues()">↻ Uppdatera</button>
+        </div>
+        
+        <div class="filters">
+            <select class="filter-select" id="statusFilter" onchange="loadIssues()">
+                <option value="">All Status</option>
+                <option value="todo">Todo</option>
+                <option value="in_progress">In Progress</option>
+                <option value="blocked">Blocked</option>
+                <option value="done">Done</option>
+            </select>
+        </div>
+        
+        <div class="issues-list" id="issuesList">
+            <div class="loading">Laddar issues...</div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadIssues() {
+            const status = document.getElementById('statusFilter').value;
+            let url = '/api/issues?limit=50';
+            if (status) url += '&status=' + status;
+            
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (data.ok) {
+                const container = document.getElementById('issuesList');
+                if (data.issues.length === 0) {
+                    container.innerHTML = '<div class="loading">📭 Inga issues</div>';
+                } else {
+                    container.innerHTML = data.issues.map(issue => {
+                        const priorityClass = 'priority-' + issue.priority;
+                        const statusClass = 'status-' + issue.status;
+                        return `
+                            <div class="issue-card">
+                                <div class="issue-title">
+                                    <span class="issue-key">${issue.key}</span>
+                                    ${escapeHtml(issue.title)}
+                                </div>
+                                <div class="issue-meta">
+                                    <span class="status ${statusClass}">${issue.status}</span>
+                                    <span class="priority ${priorityClass}">${issue.priority}</span>
+                                    <span>📅 ${new Date(issue.created_at).toLocaleString('sv-SE')}</span>
+                                </div>
+                                ${issue.labels && issue.labels.length ? `
+                                    <div class="labels">
+                                        ${issue.labels.map(l => '<span class="label">' + l + '</span>').join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadIssues);
+        setInterval(loadIssues, 30000);
+    </script>
+</body>
+</html>
