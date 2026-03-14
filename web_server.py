@@ -13,9 +13,11 @@ from pathlib import Path
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
+from lib.database import get_db
 
 # Create Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -147,32 +149,17 @@ def handle_command(data):
 def handle_ping():
     emit('pong', {'timestamp': datetime.now().isoformat()})
 
-def main():
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--host', default='0.0.0.0')
-    parser.add_argument('--port', type=int, default=5000)
-    args = parser.parse_args()
-    
-    ip = args.host if args.host != '0.0.0.0' else '192.168.2.22'
-    
-    print(f"""╔══════════════════════════════════════════════════╗
-║     OpenClaw CyberDeck Web Server (DEMO)         ║
-╠══════════════════════════════════════════════════╣
-║  URL:  http://{ip}:{args.port:<5}                          ║
-║  Local: http://localhost:{args.port:<5}                       ║
-║                                                   ║
-║  PinePhone: http://{ip}:{args.port:<5}                 ║
-╚══════════════════════════════════════════════════╝""")
-    
-    socketio.run(app, host=args.host, port=args.port, debug=False, use_reloader=False, allow_unsafe_werkzeug=True)
+# Dashboard route
+@app.route('/dashboard')
+def dashboard():
+    """Render cyberdeck dashboard with issues overview."""
+    return render_template('dashboard.html')
 
-
-# Issues routes from issues_full.py
-@app.route('/')
+# Issues routes
+@app.route('/issues')
 def issues():
+    """Render issues viewer."""
     return render_template('issues_full.html')
-
 
 @app.route('/api/issues')
 def api_issues():
@@ -198,9 +185,9 @@ def api_issues():
         
         cur.execute(query, params)
         
-        issues = []
+        issues_list = []
         for row in cur.fetchall():
-            issues.append({
+            issues_list.append({
                 'key': row[0],
                 'title': row[1],
                 'status': row[2],
@@ -210,8 +197,7 @@ def api_issues():
                 'assignee_agent': row[6]
             })
         
-        return jsonify({'ok': True, 'issues': issues})
-
+        return jsonify({'ok': True, 'issues': issues_list})
 
 @app.route('/api/issues/<key>')
 def api_issue_detail(key):
@@ -262,7 +248,6 @@ def api_issue_detail(key):
         issue['events'] = events
         return jsonify({'ok': True, 'issue': issue})
 
-
 @app.route('/api/issues/<key>/update', methods=['POST'])
 def api_update_issue(key):
     """Update issue fields"""
@@ -298,7 +283,6 @@ def api_update_issue(key):
     
     return jsonify({'ok': True, 'message': f'Updated {key}'})
 
-
 @app.route('/api/issues/<key>/comment', methods=['POST'])
 def api_add_comment(key):
     """Add comment to issue"""
@@ -315,7 +299,6 @@ def api_add_comment(key):
         """, (key, 'comment', comment))
     
     return jsonify({'ok': True, 'message': 'Comment added'})
-
 
 @app.route('/api/issues/create', methods=['POST'])
 def api_create_issue():
@@ -343,7 +326,25 @@ def api_create_issue():
     
     return jsonify({'ok': True, 'key': key})
 
-
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', default='0.0.0.0')
+    parser.add_argument('--port', type=int, default=5000)
+    args = parser.parse_args()
+    
+    ip = args.host if args.host != '0.0.0.0' else '192.168.2.22'
+    
+    print(f"""╔══════════════════════════════════════════════════╗
+║     OpenClaw CyberDeck Web Server                ║
+╠══════════════════════════════════════════════════╣
+║  URLs:                                            ║
+║  - Main:   http://{ip}:{args.port:<5}                 ║
+║  - Dashboard: http://{ip}:{args.port:<5}<5>dashboard║
+║  - Issues:  http://{ip}:{args.port:<5}<5>issues    ║
+╚══════════════════════════════════════════════════╝""")
+    
+    socketio.run(app, host=args.host, port=args.port, debug=False, use_reloader=False, allow_unsafe_werkzeug=True)
 
 if __name__ == '__main__':
     main()
