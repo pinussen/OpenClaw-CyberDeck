@@ -332,17 +332,17 @@
                 return;
             }
             
-            // Sort: in_progress first, then priority high, then due date
+            // Sort: priority first, then in_progress, then due date
             const sortedIssues = [...issues].sort((a, b) => {
-                // Status: in_progress before todo
-                const sA = a.status === 'in_progress' ? 0 : 1;
-                const sB = b.status === 'in_progress' ? 0 : 1;
-                if (sA !== sB) return sA - sB;
-                
                 // Priority: high first
                 const pA = a.priority === 'high' ? 0 : (a.priority === 'medium' ? 1 : 2);
                 const pB = b.priority === 'high' ? 0 : (b.priority === 'medium' ? 1 : 2);
                 if (pA !== pB) return pA - pB;
+                
+                // Status: in_progress before todo (within same priority)
+                const sA = a.status === 'in_progress' ? 0 : 1;
+                const sB = b.status === 'in_progress' ? 0 : 1;
+                if (sA !== sB) return sA - sB;
                 
                 // Due date
                 if (a.due_at && !b.due_at) return -1;
