@@ -182,7 +182,7 @@ def dashboard_summary():
             ORDER BY 
                 CASE WHEN parent.key IS NULL THEN 0 ELSE 1 END,
                 i.created_at DESC
-            LIMIT 20
+            LIMIT 50
         """)
         
         recent = []
@@ -232,7 +232,7 @@ def api_issues():
             query += " WHERE priority = %s"
             params.append(priority)
         
-        query += " ORDER BY created_at DESC LIMIT 200"
+        query += " ORDER BY created_at DESC LIMIT 500"
         
         cur.execute(query, params)
         
