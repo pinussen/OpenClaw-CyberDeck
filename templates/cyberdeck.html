@@ -249,6 +249,41 @@
             color: #666;
         }
         
+        .log-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        
+        .log-entry {
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .log-entry:last-child { border-bottom: none; }
+        
+        .log-time { color: #666; min-width: 45px; font-size: 0.9em; }
+        .log-component { 
+            color: #00ff88; 
+            min-width: 50px; 
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .log-level-info { color: #888; }
+        .log-level-warn { color: #ffaa00; }
+        .log-level-error { color: #ff4444; }
+        .log-level-debug { color: #66aaff; }
+        .log-message { color: #ccc; flex: 1; word-break: break-word; }
+        
+        .log-entry:hover { background: rgba(255,255,255,0.05); }
+        
         @media (max-width: 900px) {
             .main { grid-template-columns: 1fr; }
             .sidebar { order: -1; }
@@ -295,6 +330,13 @@
                 <h3>📊 Queue Status</h3>
                 <div class="queue-stats" id="queueStats">
                     <div class="empty-state">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>📜 Dagens Logg</h3>
+                <div class="log-container" id="todayLog">
+                    <div class="empty-state">Laddar...</div>
                 </div>
             </div>
             
@@ -404,6 +446,30 @@
                 }
             } catch (error) {
                 console.error('Failed to load actions:', error);
+            }
+        }
+        
+        async function loadTodayLog() {
+            try {
+                const res = await fetch('/api/today-log');
+                const data = await res.json();
+                
+                const container = document.getElementById('todayLog');
+                if (data.ok && data.entries.length > 0) {
+                    container.innerHTML = data.entries.map(entry => {
+                        const levelClass = 'log-level-' + (entry.level === 'warning' ? 'warn' : entry.level);
+                        return `<div class="log-entry">
+                            <span class="log-time">${entry.time}</span>
+                            <span class="log-component">${escapeHtml(entry.component)}</span>
+                            <span class="${levelClass}">${escapeHtml(entry.level.toUpperCase())}</span>
+                            <span class="log-message">${escapeHtml(entry.message)}</span>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state">📭 Ingen logg för idag</div>';
+                }
+            } catch (error) {
+                document.getElementById('todayLog').innerHTML = '<div class="empty-state">❌ Kunde inte ladda</div>';
             }
         }
         

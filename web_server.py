@@ -576,6 +576,45 @@ def api_actions():
     return jsonify({'ok': True, 'actions': actions})
 
 
+
+
+@app.route('/api/today-log')
+def api_today_log():
+    """Get today's OpenClaw log entries"""
+    from datetime import datetime
+    import os
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    log_file = f'/tmp/openclaw/openclaw-{today}.log'
+    
+    entries = []
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                for line in lines[-100:]:  # Last 100 lines
+                    line = line.strip()
+                    if not line:
+                        continue
+                    # Parse log line: 2026-03-15 21:30:15 [main] INFO Message
+                    import re
+                    match = re.match(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (\w+) (.+)', line)
+                    if match:
+                        timestamp, component, level, message = match.groups()
+                        entries.append({
+                            'time': timestamp[11:16],  # HH:MM only
+                            'component': component,
+                            'level': level.lower(),
+                            'message': message[:120]  # Truncate long messages
+                        })
+        except Exception as e:
+            entries.append({'time': '', 'component': 'error', 'level': 'error', 'message': str(e)})
+    else:
+        entries.append({'time': '', 'component': 'system', 'level': 'info', 'message': f'No log file for {today}'})
+    
+    return jsonify({'ok': True, 'date': today, 'entries': entries[-50:]})  # Last 50 entries
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
