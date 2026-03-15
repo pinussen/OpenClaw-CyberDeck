@@ -549,5 +549,53 @@ def api_activities():
     return jsonify({'ok': True, 'activities': activities})
 
 
+
+
+@app.route('/api/actions')
+def api_actions():
+    """Get system actions from journal and issue events"""
+    import subprocess
+    actions = []
+    
+    # Get recent system logs for cyberdeck
+    try:
+        result = subprocess.run(
+            ['journalctl', '-u', 'cyberdeck', '-n', '20', '--no-pager', '-o', 'short-iso'],
+            capture_output=True, text=True, timeout=5
+        )
+        for line in result.stdout.strip().split('
+')[-20:]:
+            if line and ('error' in line.lower() or 'failed' in line.lower() or 'restart' in line.lower()):
+                actions.append({
+                    'time': line[:19] if len(line) > 19 else '',
+                    'type': 'system',
+                    'source': 'cyberdeck',
+                    'message': line[20:] if len(line) > 20 else line
+                })
+    except Exception as e:
+        pass
+    
+    # Get recent issue events
+    with get_db().cursor() as cur:
+        cur.execute("""
+            SELECT i.key, e.event_type, e.actor, e.created_at
+            FROM issue_events e
+            JOIN issues i ON i.id = e.issue_id
+            ORDER BY e.created_at DESC
+            LIMIT 30
+        """)
+        for row in cur.fetchall():
+            actions.append({
+                'time': row[3].isoformat() if row[3] else '',
+                'type': 'agent' if row[2] else 'user',
+                'source': row[2] or 'system',
+                'message': f"{row[1]} on {row[0]}"
+            })
+    
+    # Sort by time
+    actions.sort(key=lambda x: x['time'], reverse=True)
+    return jsonify({'ok': True, 'actions': actions[:30]})
+
+
 if __name__ == '__main__':
     main()

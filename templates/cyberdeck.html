@@ -378,6 +378,35 @@
             `).join('');
         }
         
+        async function loadActions() {
+            try {
+                const res = await fetch('/api/actions');
+                const data = await res.json();
+                
+                if (data.ok) {
+                    const container = document.getElementById('actionLog');
+                    if (data.actions.length === 0) {
+                        container.innerHTML = '<div class="empty-state">📭 No recent actions</div>';
+                    } else {
+                        container.innerHTML = data.actions.map(act => {
+                            const time = new Date(act.time).toLocaleString('sv-SE');
+                            const typeColor = act.type === 'agent' ? '#00ff88' : (act.type === 'system' ? '#ff6464' : '#888');
+                            const typeIcon = act.type === 'agent' ? '🤖' : (act.type === 'system' ? '⚙️' : '👤');
+                            return `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #333; display: flex; gap: 10px; align-items: flex-start;">
+                                    <span style="color: #666; font-size: 0.8em; min-width: 140px;">${time}</span>
+                                    <span style="color: ${typeColor}; min-width: 60px;">${typeIcon} ${act.source}</span>
+                                    <span style="color: #ccc; flex: 1;">${escapeHtml(act.message)}</span>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load actions:', error);
+            }
+        }
+        
         async function loadQueue() {
             try {
                 const res = await fetch('/api/queue');
@@ -429,6 +458,54 @@
             // Refresh every 30 seconds
             setInterval(loadQueue, 30000);
         });
+    </script>
+    
+    <!-- Action Log Modal -->
+    <div id="actionLogModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+        <div style="background: #1a1a2e; border: 1px solid #00ff88; border-radius: 10px; max-width: 900px; margin: 50px auto; max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="padding: 15px 20px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: #00ff88;">🔍 Action Log</h3>
+                <button onclick="document.getElementById('actionLogModal').style.display='none'" style="background: none; border: none; color: #ff6464; font-size: 1.5em; cursor: pointer;">×</button>
+            </div>
+            <div id="actionLogContent" style="padding: 20px; overflow-y: auto; flex: 1; font-family: monospace; font-size: 0.85em;">
+                <div class="empty-state">📭 Loading...</div>
+            </div>
+            <div style="padding: 15px 20px; border-top: 1px solid #00ff88; text-align: right;">
+                <button onclick="loadActionLog()" class="btn">🔄 Refresh</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Log Button -->
+    <button onclick="document.getElementById('actionLogModal').style.display='block'; loadActionLog();" style="position: fixed; bottom: 20px; right: 20px; background: rgba(0,255,136,0.2); border: 1px solid #00ff88; color: #00ff88; padding: 10px 20px; border-radius: 5px; cursor: pointer; z-index: 100;">
+        🔍 Action Log
+    </button>
+    
+    <script>
+        async function loadActionLog() {
+            try {
+                const res = await fetch('/api/actions');
+                const data = await res.json();
+                
+                const container = document.getElementById('actionLogContent');
+                if (data.ok && data.actions.length > 0) {
+                    container.innerHTML = data.actions.map(act => {
+                        const time = new Date(act.time).toLocaleString('sv-SE');
+                        const color = act.type === 'agent' ? '#00ff88' : (act.type === 'system' ? '#ff6464' : '#888');
+                        const icon = act.type === 'agent' ? '🤖' : (act.type === 'system' ? '⚙️' : '👤');
+                        return `<div style="padding: 8px 0; border-bottom: 1px solid #333;">
+                            <span style="color: #666;">${time}</span> 
+                            <span style="color: ${color}">${icon} ${act.source}</span>: 
+                            <span style="color: #ccc">${act.message}</span>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state">📭 No recent actions</div>';
+                }
+            } catch (e) {
+                document.getElementById('actionLogContent').innerHTML = '<div class="empty-state">❌ Failed to load</div>';
+            }
+        }
     </script>
 </body>
 </html>
