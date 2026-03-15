@@ -172,11 +172,16 @@ def dashboard_summary():
         
         cur.execute("""
             SELECT i.key, i.title, i.status, i.priority, i.labels, 
-                   COALESCE(u.display_name, u.username) as assignee
+                   COALESCE(u.display_name, u.username) as assignee,
+                   parent.key as parent_key
             FROM issues i
             LEFT JOIN issue_users u ON u.id = i.assignee_user_id
+            LEFT JOIN issue_links il ON il.to_issue_id = i.id AND il.link_type = 'subtask'
+            LEFT JOIN issues parent ON parent.id = il.from_issue_id
             WHERE i.status IN ('todo', 'in_progress', 'blocked')
-            ORDER BY i.created_at DESC
+            ORDER BY 
+                CASE WHEN parent.key IS NULL THEN 0 ELSE 1 END,
+                i.created_at DESC
             LIMIT 20
         """)
         
@@ -188,7 +193,8 @@ def dashboard_summary():
                 'status': row[2],
                 'priority': row[3],
                 'labels': row[4] or [],
-                'assignee': row[5]
+                'assignee': row[5],
+                'parent_key': row[6]
             })
         
         return jsonify({

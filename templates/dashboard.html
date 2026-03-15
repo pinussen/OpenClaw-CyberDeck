@@ -248,10 +248,44 @@
                 return;
             }
             
-            container.innerHTML = issues.map(issue => `
-                <div class="issue-item">
+            // Build parent-child map
+            const parents = issues.filter(i => !i.parent_key);
+            const children = issues.filter(i => i.parent_key);
+            
+            let html = '';
+            
+            // Render parents first
+            parents.forEach(issue => {
+                html += renderIssueItem(issue, false);
+                
+                // Find and render children under this parent
+                const childIssues = children.filter(c => c.parent_key === issue.key);
+                childIssues.forEach(child => {
+                    html += renderIssueItem(child, true);
+                });
+            });
+            
+            // Render orphaned children (children whose parent isn't in the list)
+            const orphanedChildren = children.filter(c => !parents.find(p => p.key === c.parent_key));
+            if (orphanedChildren.length > 0) {
+                if (parents.length > 0) html += '<div style="margin: 15px 0; border-bottom: 1px dashed #333;"></div>';
+                orphanedChildren.forEach(child => {
+                    html += renderIssueItem(child, false);
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function renderIssueItem(issue, isChild) {
+            const indent = isChild ? 'margin-left: 30px; border-left: 3px solid #00ff88; padding-left: 15px;' : '';
+            const parentBadge = isChild ? '<span class="badge" style="background: #00ff88; color: #000;">📎 Underärende</span>' : '';
+            
+            return `
+                <div class="issue-item" style="${indent}">
                     <div class="issue-left">
                         <span class="issue-key">${issue.key}</span>
+                        ${parentBadge}
                         <div class="issue-title">${escapeHtml(issue.title)}</div>
                         <div class="issue-meta">
                             <span class="badge badge-status badge-${issue.status}">${issue.status}</span>
@@ -263,10 +297,9 @@
                     <div class="actions">
                         <a href="/issues/${issue.key}/edit" class="action-link">✏️ Redigera</a>
                         <a href="/issues#${issue.key}" class="action-link">Öppna</a>
-                        <a href="/api/issues/${issue.key}" target="_blank" class="action-link">JSON</a>
                     </div>
                 </div>
-            `).join('');
+            `;
         }
         
         function escapeHtml(text) {
