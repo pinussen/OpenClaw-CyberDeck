@@ -334,8 +334,8 @@ def api_update_issue(key):
         content = ", ".join([f"{k}={v}" for k, v in updates.items()])
         
         cur.execute("""
-            INSERT INTO issue_events (issue_id, event_type, payload)
-            SELECT id, %s, %s::jsonb FROM issues WHERE key = %s
+            INSERT INTO issue_events (issue_id, event_type, payload, actor)
+            SELECT id, %s, %s::jsonb, 'system' FROM issues WHERE key = %s
         """, (event_type, json.dumps({"changes": content}), key))
     
     return jsonify({'ok': True, 'message': f'Updated {key}'})
@@ -351,8 +351,8 @@ def api_add_comment(key):
     
     with get_db().cursor() as cur:
         cur.execute("""
-            INSERT INTO issue_events (issue_id, event_type, payload)
-            SELECT id, %s, %s::jsonb FROM issues WHERE key = %s
+            INSERT INTO issue_events (issue_id, event_type, payload, actor)
+            SELECT id, %s, %s::jsonb, 'system' FROM issues WHERE key = %s
         """, ('comment', json.dumps({"text": comment}), key))
     
     return jsonify({'ok': True, 'message': 'Comment added'})
