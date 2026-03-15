@@ -330,14 +330,12 @@
                 return;
             }
             
-            // Sort issues: overdue first, then by due date, then priority
-            issues.sort((a, b) => {
-                // Priority sort first
-                const priorityOrder = {high: 0, medium: 1, low: 2};
-                const pDiff = (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3);
-                if (pDiff !== 0) return pDiff;
+            // Sort: priority high first, then by due date
+            const sortedIssues = [...issues].sort((a, b) => {
+                const pA = a.priority === 'high' ? 0 : (a.priority === 'medium' ? 1 : 2);
+                const pB = b.priority === 'high' ? 0 : (b.priority === 'medium' ? 1 : 2);
+                if (pA !== pB) return pA - pB;
                 
-                // Then due date (null dates last)
                 if (a.due_at && !b.due_at) return -1;
                 if (!a.due_at && b.due_at) return 1;
                 if (a.due_at && b.due_at) {
@@ -346,28 +344,19 @@
                 return 0;
             });
             
-            // Build sorted list maintaining sort order
-            const sortedIssues = [...issues]; // Already sorted above
             const processedParents = new Set();
-            
             let html = '';
             
-            // Render in sorted order, but group children under parents
+            // Render in sorted order
             sortedIssues.forEach(issue => {
-                if (issue.parent_key) {
-                    // Child issue - skip here, will be rendered under parent
-                    return;
-                }
+                if (issue.parent_key) return; // Skip children here
                 
-                // Parent or standalone issue
                 if (!processedParents.has(issue.key)) {
                     processedParents.add(issue.key);
                     const childIssues = sortedIssues.filter(c => c.parent_key === issue.key);
                     html += renderParentWithChildren(issue, childIssues);
                 }
             });
-            
-            // Render orphaned children (children whose parent isn't in the list or is closed)
             const orphanedChildren = sortedIssues.filter(c => c.parent_key && !processedParents.has(c.parent_key));
             if (orphanedChildren.length > 0) {
                 if (processedParents.size > 0) html += '<div style="margin: 15px 0; border-bottom: 1px dashed #333;"></div>';
