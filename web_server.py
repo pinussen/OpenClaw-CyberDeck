@@ -580,9 +580,10 @@ def api_actions():
 
 @app.route('/api/today-log')
 def api_today_log():
-    """Get today's OpenClaw log entries"""
+    """Get today's OpenClaw log entries (JSON format)"""
     from datetime import datetime
     import os
+    import json
     
     today = datetime.now().strftime('%Y-%m-%d')
     log_file = f'/tmp/openclaw/openclaw-{today}.log'
@@ -596,23 +597,51 @@ def api_today_log():
                     line = line.strip()
                     if not line:
                         continue
-                    # Parse log line: 2026-03-15 21:30:15 [main] INFO Message
-                    import re
-                    match = re.match(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(\w+)\] (\w+) (.+)', line)
-                    if match:
-                        timestamp, component, level, message = match.groups()
+                    try:
+                        # Parse JSON log entry
+                        data = json.loads(line)
+                        timestamp = data.get('time', '')
+                        level = data.get('_meta', {}).get('logLevelName', 'INFO').lower()
+                        
+                        # Get component from name field
+                        name = data.get('name', '{}')
+                        try:
+                            name_obj = json.loads(name) if name.startswith('{') else {}
+                            component = name_obj.get('subsystem', name_obj.get('module', 'system'))
+                        except:
+                            component = 'system'
+                        
+                        # Get message - can be string or object
+                        msg = data.get('1', data.get('2', 'No message'))
+                        if isinstance(msg, dict):
+                            msg = json.dumps(msg)[:100]
+                        else:
+                            msg = str(msg)[:120]
+                        
+                        # Format time as HH:MM
+                        if timestamp:
+                            try:
+                                time_part = timestamp.split('T')[1][:5] if 'T' in timestamp else timestamp[11:16]
+                            except:
+                                time_part = '--:--'
+                        else:
+                            time_part = '--:--'
+                        
                         entries.append({
-                            'time': timestamp[11:16],  # HH:MM only
-                            'component': component,
-                            'level': level.lower(),
-                            'message': message[:120]  # Truncate long messages
+                            'time': time_part,
+                            'component': component[:12],
+                            'level': level,
+                            'message': msg
                         })
+                    except json.JSONDecodeError:
+                        # Skip non-JSON lines
+                        continue
         except Exception as e:
-            entries.append({'time': '', 'component': 'error', 'level': 'error', 'message': str(e)})
+            entries.append({'time': '', 'component': 'error', 'level': 'error', 'message': str(e)[:100]})
     else:
         entries.append({'time': '', 'component': 'system', 'level': 'info', 'message': f'No log file for {today}'})
     
-    return jsonify({'ok': True, 'date': today, 'entries': entries[-50:]})  # Last 50 entries
+    return jsonify({'ok': True, 'date': today, 'entries': entries[-50:]})
 
 
 if __name__ == '__main__':
