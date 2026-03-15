@@ -641,7 +641,8 @@ def api_today_log():
     else:
         entries.append({'time': '', 'component': 'system', 'level': 'info', 'message': f'No log file for {today}'})
     
-    return jsonify({'ok': True, 'date': today, 'entries': entries[-50:]})
+    entries.reverse()
+    return jsonify({'ok': True, 'date': today, 'entries': entries[:50]})
 
 
 if __name__ == '__main__':

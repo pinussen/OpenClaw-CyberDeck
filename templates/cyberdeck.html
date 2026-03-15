@@ -485,6 +485,20 @@
             }
         }
         
+        let logRefreshInterval = null;
+        
+        function startLogRefresh() {
+            if (logRefreshInterval) return;
+            logRefreshInterval = setInterval(loadTodayLog, 5000); // Refresh every 5s
+        }
+        
+        function stopLogRefresh() {
+            if (logRefreshInterval) {
+                clearInterval(logRefreshInterval);
+                logRefreshInterval = null;
+            }
+        }
+        
         function switchTab(tab) {
             document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.feed-content').forEach(c => c.classList.remove('active'));
@@ -492,7 +506,7 @@
             document.getElementById('tab-' + tab).classList.add('active');
             document.getElementById('feed-' + tab).classList.add('active');
             
-            if (tab === 'log') loadTodayLog();
+            if (tab === 'log') { loadTodayLog(); startLogRefresh(); } else { stopLogRefresh(); }
         }
         
         async function loadTodayLog() {
