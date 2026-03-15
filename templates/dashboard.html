@@ -315,6 +315,8 @@
                 
                 if (data.ok) {
                     document.getElementById('openCount').textContent = data.summary.total_issues + ' öppna';
+                    console.log('Fetched', data.recent_issues.length, 'issues');
+                    console.log('First issue:', data.recent_issues[0]?.key);
                     renderIssues(data.recent_issues || []);
                 }
             } catch (error) {
