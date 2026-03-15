@@ -233,8 +233,7 @@ def api_issues():
             query += " WHERE priority = %s"
             params.append(priority)
         
-        query += " ORDER BY
-                CASE i.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END, created_at DESC LIMIT 500"
+        query += " ORDER BY created_at DESC LIMIT 500"
         
         cur.execute(query, params)
         
