@@ -340,6 +340,18 @@
             </div>
             <button onclick="addComment()" class="btn">💬 Lägg till kommentar</button>
         </div>
+        
+        <!-- Parent Issue -->
+        <div id="parentSection" style="display: none; margin-top: 30px;">
+            <h2 class="section-title">📁 Överordnat ärende</h2>
+            <div id="parentContent" class="form-card"></div>
+        </div>
+        
+        <!-- Subtasks -->
+        <div id="subtasksSection" style="display: none; margin-top: 30px;">
+            <h2 class="section-title">📎 Underärenden</h2>
+            <div id="subtasksList" class="comments-list"></div>
+        </div>
     </div>
     
     <script>
@@ -371,12 +383,61 @@
                 
                 renderComments(currentEvents);
                 
+                // Render subtasks
+                if (issue.subtasks && issue.subtasks.length > 0) {
+                    renderSubtasks(issue.subtasks);
+                }
+                
+                // Render parent
+                if (issue.parent) {
+                    renderParent(issue.parent);
+                }
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('editForm').style.display = 'block';
                 
             } catch (error) {
                 showMessage('Error: ' + error.message, 'error');
             }
+        }
+        
+        function renderSubtasks(subtasks) {
+            const container = document.getElementById('subtasksList');
+            const section = document.getElementById('subtasksSection');
+            
+            container.innerHTML = subtasks.map(st => `
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-type">${st.key}</span>
+                        <span>${st.status}</span>
+                    </div>
+                    <div class="comment-content">
+                        <a href="/issues/${st.key}/edit" style="color: var(--primary);">${escapeHtml(st.title)}</a>
+                    </div>
+                </div>
+            `).join('');
+            
+            section.style.display = 'block';
+        }
+        
+        function renderParent(parent) {
+            const container = document.getElementById('parentContent');
+            const section = document.getElementById('parentSection');
+            
+            container.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: var(--primary);">${parent.key}</strong>
+                        <span style="margin-left: 10px;">${escapeHtml(parent.title)}</span>
+                    </div>
+                    <div>
+                        <span style="color: #888;">${parent.status}</span>
+                        <a href="/issues/${parent.key}/edit" class="btn btn-small" style="margin-left: 10px;">Öppna</a>
+                    </div>
+                </div>
+            `;
+            
+            section.style.display = 'block';
         }
         
         function renderComments(events) {

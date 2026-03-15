@@ -295,6 +295,38 @@ def api_issue_detail(key):
             })
         
         issue['events'] = events
+        
+        # Get subtasks
+        cur.execute("""
+            SELECT i.key, i.title, i.status
+            FROM issue_links il
+            JOIN issues i ON i.id = il.to_issue_id
+            WHERE il.from_issue_id = %s AND il.link_type = 'subtask'
+        """, (issue_id,))
+        
+        subtasks = []
+        for row in cur.fetchall():
+            subtasks.append({
+                'key': row[0],
+                'title': row[1],
+                'status': row[2]
+            })
+        issue['subtasks'] = subtasks
+        
+        # Get parent
+        cur.execute("""
+            SELECT i.key, i.title, i.status
+            FROM issue_links il
+            JOIN issues i ON i.id = il.from_issue_id
+            WHERE il.to_issue_id = %s AND il.link_type = 'subtask'
+        """, (issue_id,))
+        
+        row = cur.fetchone()
+        if row:
+            issue['parent'] = {'key': row[0], 'title': row[1], 'status': row[2]}
+        else:
+            issue['parent'] = None
+        
         return jsonify({'ok': True, 'issue': issue})
 
 @app.route('/api/issues/<key>/update', methods=['POST'])
