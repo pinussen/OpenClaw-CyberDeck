@@ -346,16 +346,25 @@
                 return 0;
             });
             
-            // Build parent-child map
-            const parents = issues.filter(i => !i.parent_key);
-            const children = issues.filter(i => i.parent_key);
+            // Build sorted list maintaining sort order
+            const sortedIssues = [...issues]; // Already sorted above
+            const processedParents = new Set();
             
             let html = '';
             
-            // Render parents with collapsible children
-            parents.forEach(issue => {
-                const childIssues = children.filter(c => c.parent_key === issue.key);
-                html += renderParentWithChildren(issue, childIssues);
+            // Render in sorted order, but group children under parents
+            sortedIssues.forEach(issue => {
+                if (issue.parent_key) {
+                    // Child issue - skip here, will be rendered under parent
+                    return;
+                }
+                
+                // Parent or standalone issue
+                if (!processedParents.has(issue.key)) {
+                    processedParents.add(issue.key);
+                    const childIssues = sortedIssues.filter(c => c.parent_key === issue.key);
+                    html += renderParentWithChildren(issue, childIssues);
+                }
             });
             
             // Render orphaned children (children whose parent isn't in the list)
