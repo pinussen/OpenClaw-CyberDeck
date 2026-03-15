@@ -171,10 +171,12 @@ def dashboard_summary():
         open_count = cur.fetchone()[0]
         
         cur.execute("""
-            SELECT key, title, status, priority, labels, assignee_agent
-            FROM issues 
-            WHERE status IN ('todo', 'in_progress', 'blocked')
-            ORDER BY created_at DESC
+            SELECT i.key, i.title, i.status, i.priority, i.labels, 
+                   COALESCE(u.display_name, u.username) as assignee
+            FROM issues i
+            LEFT JOIN issue_users u ON u.id = i.assignee_user_id
+            WHERE i.status IN ('todo', 'in_progress', 'blocked')
+            ORDER BY i.created_at DESC
             LIMIT 5
         """)
         
@@ -210,8 +212,10 @@ def api_issues():
         priority = request.args.get('priority')
         
         query = """
-            SELECT key, title, status, priority, created_at, labels, assignee_agent
-            FROM issues
+            SELECT i.key, i.title, i.status, i.priority, i.created_at, i.labels, 
+                   COALESCE(u.display_name, u.username) as assignee
+            FROM issues i
+            LEFT JOIN issue_users u ON u.id = i.assignee_user_id
         """
         params = []
         
@@ -235,7 +239,7 @@ def api_issues():
                 'priority': row[3],
                 'created_at': row[4].isoformat() if row[4] else None,
                 'labels': row[5] or [],
-                'assignee_agent': row[6]
+                'assignee': row[6]
             })
         
         return jsonify({'ok': True, 'issues': issues_list})
@@ -330,9 +334,9 @@ def api_update_issue(key):
         content = ", ".join([f"{k}={v}" for k, v in updates.items()])
         
         cur.execute("""
-            INSERT INTO issue_events (issue_key, event_type, content)
-            VALUES (%s, %s, %s)
-        """, (key, event_type, content))
+            INSERT INTO issue_events (issue_id, event_type, payload)
+            SELECT id, %s, %s::jsonb FROM issues WHERE key = %s
+        """, (event_type, json.dumps({"changes": content}), key))
     
     return jsonify({'ok': True, 'message': f'Updated {key}'})
 
