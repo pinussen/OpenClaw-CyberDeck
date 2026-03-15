@@ -173,7 +173,8 @@ def dashboard_summary():
         cur.execute("""
             SELECT i.key, i.title, i.status, i.priority, i.labels, 
                    COALESCE(u.display_name, u.username) as assignee,
-                   parent.key as parent_key
+                   parent.key as parent_key,
+                   i.due_at
             FROM issues i
             LEFT JOIN issue_users u ON u.id = i.assignee_user_id
             LEFT JOIN issue_links il ON il.to_issue_id = i.id AND il.link_type = 'subtask'
@@ -195,7 +196,8 @@ def dashboard_summary():
                 'priority': row[3],
                 'labels': row[4] or [],
                 'assignee': row[5],
-                'parent_key': row[6]
+                'parent_key': row[6],
+                'due_at': row[7].isoformat() if row[7] else None
             })
         
         return jsonify({
@@ -259,7 +261,7 @@ def api_issue_detail(key):
         cur.execute("""
             SELECT i.id, i.key, i.title, i.description, i.status, i.priority,
                    u.username as assignee_user_id, i.reporter, i.created_at, i.updated_at,
-                   i.labels, i.metadata
+                   i.labels, i.metadata, i.due_at
             FROM issues i
             LEFT JOIN issue_users u ON u.id = i.assignee_user_id
             WHERE i.key = %s
@@ -282,7 +284,8 @@ def api_issue_detail(key):
             'created_at': row[8].isoformat() if row[8] else None,
             'updated_at': row[9].isoformat() if row[9] else None,
             'labels': row[10] or [],
-            'metadata': row[11] or {}
+            'metadata': row[11] or {},
+            'due_at': row[12].isoformat() if row[12] else None
         }
         
         # Get events - join with issues to get UUID from key
@@ -344,7 +347,7 @@ def api_update_issue(key):
     """Update issue fields"""
     data = request.get_json()
     
-    valid_fields = {'status', 'priority', 'title', 'assignee_user_id', 'labels'}
+    valid_fields = {'status', 'priority', 'title', 'assignee_user_id', 'due_at', 'labels'}
     updates = {}
     for field in valid_fields:
         if field in data:
