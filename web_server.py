@@ -146,6 +146,15 @@ def handle_command(data):
         emit('display_state', display.get_state_dict())
 
 @socketio.on('ping')
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    text = data.get('text', '')
+    emit('message', {'text': text, 'timestamp': datetime.now().isoformat()}, broadcast=True)
+
+@socketio.on('activity')
+def handle_activity(data):
+    emit('activity', data, broadcast=True)
 def handle_ping():
     emit('pong', {'timestamp': datetime.now().isoformat()})
 
@@ -489,6 +498,56 @@ def main():
 ╚══════════════════════════════════════════════════╝""")
     
     socketio.run(app, host=args.host, port=args.port, debug=False, use_reloader=False, allow_unsafe_werkzeug=True)
+
+
+
+@app.route('/api/queue')
+def api_queue():
+    """Get queue status from issues"""
+    with get_db().cursor() as cur:
+        cur.execute("""
+            SELECT status, COUNT(*) as count 
+            FROM issues 
+            WHERE status IN ('todo', 'in_progress', 'blocked')
+            GROUP BY status
+        """)
+        queue = {row[0]: row[1] for row in cur.fetchall()}
+        
+        cur.execute("""
+            SELECT key, title, status, priority 
+            FROM issues 
+            WHERE status IN ('todo', 'in_progress', 'blocked')
+            ORDER BY created_at DESC
+            LIMIT 10
+        """)
+        recent = [
+            {'key': r[0], 'title': r[1], 'status': r[2], 'priority': r[3]}
+            for r in cur.fetchall()
+        ]
+        
+    return jsonify({'ok': True, 'queue': queue, 'recent': recent})
+
+@app.route('/api/activities')
+def api_activities():
+    """Get recent activities from issue_events"""
+    with get_db().cursor() as cur:
+        cur.execute("""
+            SELECT i.key, e.event_type, e.payload, e.created_at
+            FROM issue_events e
+            JOIN issues i ON i.id = e.issue_id
+            ORDER BY e.created_at DESC
+            LIMIT 20
+        """)
+        activities = []
+        for row in cur.fetchall():
+            activities.append({
+                'issue_key': row[0],
+                'type': row[1],
+                'detail': str(row[2])[:100] if row[2] else '',
+                'timestamp': row[3].isoformat() if row[3] else None
+            })
+    return jsonify({'ok': True, 'activities': activities})
+
 
 if __name__ == '__main__':
     main()
