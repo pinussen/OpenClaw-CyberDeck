@@ -179,7 +179,8 @@ def dashboard_summary():
             LEFT JOIN issue_links il ON il.to_issue_id = i.id AND il.link_type = 'subtask'
             LEFT JOIN issues parent ON parent.id = il.from_issue_id
             WHERE i.status IN ('todo', 'in_progress', 'blocked')
-            ORDER BY 
+            ORDER BY
+                CASE i.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END, 
                 CASE WHEN parent.key IS NULL THEN 0 ELSE 1 END,
                 i.created_at DESC
             LIMIT 50
@@ -232,7 +233,8 @@ def api_issues():
             query += " WHERE priority = %s"
             params.append(priority)
         
-        query += " ORDER BY created_at DESC LIMIT 500"
+        query += " ORDER BY
+                CASE i.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END, created_at DESC LIMIT 500"
         
         cur.execute(query, params)
         
@@ -290,7 +292,8 @@ def api_issue_detail(key):
             FROM issue_events e
             JOIN issues i ON i.id = e.issue_id
             WHERE i.key = %s
-            ORDER BY e.created_at DESC
+            ORDER BY
+                CASE i.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END, e.created_at DESC
         """, (key,))
         
         events = []

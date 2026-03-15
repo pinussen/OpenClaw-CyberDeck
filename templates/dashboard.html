@@ -202,6 +202,69 @@
         }
         
         .summary-box li:last-child { border-bottom: none; }
+        
+        .parent-row {
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .parent-row:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .expand-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: rgba(0,255,136,0.2);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            color: #00ff88;
+            font-size: 12px;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .expand-btn:hover {
+            background: rgba(0,255,136,0.4);
+        }
+        
+        .expand-btn.collapsed::after {
+            content: "▶";
+        }
+        
+        .expand-btn.expanded::after {
+            content: "▼";
+        }
+        
+        .child-row {
+            display: none;
+            margin-left: 30px;
+            border-left: 3px solid #00ff88;
+            padding-left: 15px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .child-row.visible {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .child-count {
+            background: rgba(0,255,136,0.2);
+            color: #00ff88;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -254,15 +317,10 @@
             
             let html = '';
             
-            // Render parents first
+            // Render parents with collapsible children
             parents.forEach(issue => {
-                html += renderIssueItem(issue, false);
-                
-                // Find and render children under this parent
                 const childIssues = children.filter(c => c.parent_key === issue.key);
-                childIssues.forEach(child => {
-                    html += renderIssueItem(child, true);
-                });
+                html += renderParentWithChildren(issue, childIssues);
             });
             
             // Render orphaned children (children whose parent isn't in the list)
@@ -270,21 +328,59 @@
             if (orphanedChildren.length > 0) {
                 if (parents.length > 0) html += '<div style="margin: 15px 0; border-bottom: 1px dashed #333;"></div>';
                 orphanedChildren.forEach(child => {
-                    html += renderIssueItem(child, false);
+                    html += renderIssueItem(child, false, false);
                 });
             }
             
             container.innerHTML = html;
+            
+            // Add click handlers
+            document.querySelectorAll('.parent-row').forEach(el => {
+                el.addEventListener('click', toggleChildren);
+            });
         }
         
-        function renderIssueItem(issue, isChild) {
-            const indent = isChild ? 'margin-left: 30px; border-left: 3px solid #00ff88; padding-left: 15px;' : '';
+        function renderParentWithChildren(parent, children) {
+            const hasChildren = children.length > 0;
+            const childCount = hasChildren ? `<span class="child-count">${children.length}</span>` : '';
+            const expandBtn = hasChildren ? '<span class="expand-btn collapsed" data-parent="' + parent.key + '"></span>' : '';
+            
+            let html = renderIssueItem(parent, false, true, expandBtn, childCount);
+            
+            children.forEach(child => {
+                html += renderIssueItem(child, true, false, '', '', parent.key);
+            });
+            
+            return html;
+        }
+        
+        function toggleChildren(e) {
+            const parentKey = e.currentTarget.dataset.key;
+            const btn = e.currentTarget.querySelector('.expand-btn');
+            const children = document.querySelectorAll('.child-of-' + parentKey);
+            
+            if (btn) {
+                btn.classList.toggle('collapsed');
+                btn.classList.toggle('expanded');
+            }
+            
+            children.forEach(child => {
+                child.classList.toggle('visible');
+            });
+        }
+        
+        function renderIssueItem(issue, isChild, isParent, expandBtn = '', childCount = '', parentKey = '') {
+            const childClass = isChild ? 'child-row child-of-' + parentKey : '';
+            const parentClass = isParent ? 'parent-row' : '';
+            const parentData = isParent ? 'data-key="' + issue.key + '"' : '';
             const parentBadge = isChild ? '<span class="badge" style="background: #00ff88; color: #000;">📎 Underärende</span>' : '';
             
             return `
-                <div class="issue-item" style="${indent}">
+                <div class="issue-item ${parentClass} ${childClass}" ${parentData} style="${isChild ? '' : ''}">
                     <div class="issue-left">
+                        ${expandBtn}
                         <span class="issue-key">${issue.key}</span>
+                        ${childCount}
                         ${parentBadge}
                         <div class="issue-title">${escapeHtml(issue.title)}</div>
                         <div class="issue-meta">
