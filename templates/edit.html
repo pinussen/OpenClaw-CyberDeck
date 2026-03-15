@@ -298,27 +298,21 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="assignee_agent">Tilldelad agent</label>
-                        <select id="assignee_agent" name="assignee_agent">
-                            <option value="">-- Ingen agent --</option>
-                            <option value="coding">coding</option>
-                            <option value="architect">architect</option>
-                            <option value="ops">ops</option>
-                            <option value="tester">tester</option>
-                            <option value="research">research</option>
-                            <option value="garden">garden</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="assignee_user_id">Tilldelad användare</label>
-                        <select id="assignee_user_id" name="assignee_user_id">
-                            <option value="">-- Ingen användare --</option>
-                            <option value="bjorn">Björn Wallentinus (jag)</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="assignee">Tilldelad till</label>
+                    <select id="assignee" name="assignee">
+                        <option value="">-- Ingen --</option>
+                        <optgroup label="👤 Användare">
+                            <option value="bjorn">Björn Wallentinus</option>
+                        </optgroup>
+                        <optgroup label="🤖 Agenter">
+                            <option value="bytesmeden">ByteSmeden (coding)</option>
+                            <option value="archistrukt">Archistrukt (architect)</option>
+                            <option value="orion">Orion (ops)</option>
+                            <option value="testvakten">Testvakten (tester)</option>
+                            <option value="research">Research (research)</option>
+                        </optgroup>
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -372,8 +366,7 @@
                 document.getElementById('description').value = issue.description || '';
                 document.getElementById('status').value = issue.status || 'todo';
                 document.getElementById('priority').value = issue.priority || 'medium';
-                document.getElementById('assignee_agent').value = issue.assignee_agent || '';
-                document.getElementById('assignee_user_id').value = issue.assignee_user_id || '';
+                document.getElementById('assignee').value = issue.assignee_user_id || '';
                 document.getElementById('labels').value = (issue.labels || []).join(', ');
                 
                 renderComments(currentEvents);
@@ -535,14 +528,12 @@
             const labelsInput = document.getElementById('labels').value;
             const labels = labelsInput ? labelsInput.split(',').map(l => l.trim()).filter(l => l) : [];
             
-            const userId = document.getElementById('assignee_user_id').value;
             const updates = {
                 title: document.getElementById('title').value,
                 description: document.getElementById('description').value,
                 status: document.getElementById('status').value,
                 priority: document.getElementById('priority').value,
-                assignee_agent: document.getElementById('assignee_agent').value || null,
-                assignee_user_id: userId || null,
+                assignee_user_id: document.getElementById('assignee').value || null,
                 labels: labels
             };
             

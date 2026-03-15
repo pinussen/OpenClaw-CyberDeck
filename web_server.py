@@ -296,7 +296,7 @@ def api_update_issue(key):
     """Update issue fields"""
     data = request.get_json()
     
-    valid_fields = {'status', 'priority', 'title', 'assignee_agent', 'assignee_user_id', 'labels'}
+    valid_fields = {'status', 'priority', 'title', 'assignee_user_id', 'labels'}
     updates = {}
     for field in valid_fields:
         if field in data:
