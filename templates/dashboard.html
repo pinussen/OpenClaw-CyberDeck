@@ -461,5 +461,71 @@
         loadDashboard();
         setInterval(loadDashboard, 30000);
     </script>
+    
+    <!-- Action Log Modal -->
+    <div id="actionLogModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000;">
+        <div style="background: #1a1a2e; border: 2px solid #00ff88; border-radius: 10px; max-width: 900px; margin: 50px auto; max-height: 80vh; display: flex; flex-direction: column;">
+            <div style="padding: 15px 20px; border-bottom: 2px solid #00ff88; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: #00ff88;">🔍 Action Log</h2>
+                <button onclick="hideActionLog()" style="background: #ff4444; border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Stäng</button>
+            </div>
+            <div id="actionLogContent" style="padding: 20px; overflow-y: auto; flex: 1; font-family: 'Courier New', monospace; font-size: 0.9em;">
+                <div class="loading">Laddar...</div>
+            </div>
+            <div style="padding: 15px 20px; border-top: 2px solid #00ff88; text-align: right;">
+                <button onclick="loadActionLog()" class="btn">🔄 Uppdatera</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showActionLog() {
+            document.getElementById('actionLogModal').style.display = 'block';
+            loadActionLog();
+        }
+        
+        function hideActionLog() {
+            document.getElementById('actionLogModal').style.display = 'none';
+        }
+        
+        async function loadActionLog() {
+            const container = document.getElementById('actionLogContent');
+            container.innerHTML = '<div class="loading">Laddar...</div>';
+            
+            try {
+                const res = await fetch('/api/actions');
+                const data = await res.json();
+                
+                if (data.ok && data.actions.length > 0) {
+                    container.innerHTML = data.actions.map(act => {
+                        const time = new Date(act.time).toLocaleString('sv-SE');
+                        const color = act.type === 'agent' ? '#00ff88' : (act.type === 'system' ? '#ff6464' : '#888');
+                        const icon = act.type === 'agent' ? '🤖' : (act.type === 'system' ? '⚙️' : '👤');
+                        return `<div style="padding: 10px 0; border-bottom: 1px solid #333; line-height: 1.5;">
+                            <div style="color: #666; font-size: 0.85em;">${time}</div>
+                            <div>
+                                <span style="color: ${color}; font-weight: bold;">${icon} ${act.source}</span>
+                                <span style="color: #ccc; margin-left: 10px;">${escapeHtml(act.message)}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">📭 Inga nya actions</div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div style="color: #ff4444; padding: 20px;">❌ Kunde inte ladda action log</div>';
+            }
+        }
+        
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideActionLog();
+        });
+        
+        // Close on background click
+        document.getElementById('actionLogModal').addEventListener('click', (e) => {
+            if (e.target.id === 'actionLogModal') hideActionLog();
+        });
+    </script>
 </body>
 </html>

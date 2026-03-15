@@ -553,27 +553,8 @@ def api_activities():
 
 @app.route('/api/actions')
 def api_actions():
-    """Get system actions from journal and issue events"""
-    import subprocess
+    """Get system actions from issue events"""
     actions = []
-    
-    # Get recent system logs for cyberdeck
-    try:
-        result = subprocess.run(
-            ['journalctl', '-u', 'cyberdeck', '-n', '20', '--no-pager', '-o', 'short-iso'],
-            capture_output=True, text=True, timeout=5
-        )
-        for line in result.stdout.strip().split('
-')[-20:]:
-            if line and ('error' in line.lower() or 'failed' in line.lower() or 'restart' in line.lower()):
-                actions.append({
-                    'time': line[:19] if len(line) > 19 else '',
-                    'type': 'system',
-                    'source': 'cyberdeck',
-                    'message': line[20:] if len(line) > 20 else line
-                })
-    except Exception as e:
-        pass
     
     # Get recent issue events
     with get_db().cursor() as cur:
@@ -582,7 +563,7 @@ def api_actions():
             FROM issue_events e
             JOIN issues i ON i.id = e.issue_id
             ORDER BY e.created_at DESC
-            LIMIT 30
+            LIMIT 50
         """)
         for row in cur.fetchall():
             actions.append({
@@ -592,10 +573,5 @@ def api_actions():
                 'message': f"{row[1]} on {row[0]}"
             })
     
-    # Sort by time
-    actions.sort(key=lambda x: x['time'], reverse=True)
-    return jsonify({'ok': True, 'actions': actions[:30]})
+    return jsonify({'ok': True, 'actions': actions})
 
-
-if __name__ == '__main__':
-    main()
