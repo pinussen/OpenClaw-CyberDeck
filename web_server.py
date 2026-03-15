@@ -250,7 +250,7 @@ def api_issue_detail(key):
     with get_db().cursor() as cur:
         # Get issue - join with issue_users for assignee
         cur.execute("""
-            SELECT i.key, i.title, i.description, i.status, i.priority,
+            SELECT i.id, i.key, i.title, i.description, i.status, i.priority,
                    u.username as assignee_user_id, i.reporter, i.created_at, i.updated_at,
                    i.labels, i.metadata
             FROM issues i
@@ -262,18 +262,20 @@ def api_issue_detail(key):
         if not row:
             return jsonify({'ok': False, 'error': 'Not found'}), 404
         
+        issue_id = row[0]
+        
         issue = {
-            'key': row[0],
-            'title': row[1],
-            'description': row[2],
-            'status': row[3],
-            'priority': row[4],
-            'assignee_user_id': row[5],
-            'reporter': row[6],
-            'created_at': row[7].isoformat() if row[7] else None,
-            'updated_at': row[8].isoformat() if row[8] else None,
-            'labels': row[9] or [],
-            'metadata': row[10] or {}
+            'key': row[1],
+            'title': row[2],
+            'description': row[3],
+            'status': row[4],
+            'priority': row[5],
+            'assignee_user_id': row[6],
+            'reporter': row[7],
+            'created_at': row[8].isoformat() if row[8] else None,
+            'updated_at': row[9].isoformat() if row[9] else None,
+            'labels': row[10] or [],
+            'metadata': row[11] or {}
         }
         
         # Get events - join with issues to get UUID from key
