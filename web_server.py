@@ -248,12 +248,14 @@ def api_issues():
 def api_issue_detail(key):
     """Get single issue with events"""
     with get_db().cursor() as cur:
-        # Get issue
+        # Get issue - join with issue_users for assignee
         cur.execute("""
-            SELECT key, title, description, status, priority,
-                   assignee_agent, reporter, created_at, updated_at,
-                   labels, metadata
-            FROM issues WHERE key = %s
+            SELECT i.key, i.title, i.description, i.status, i.priority,
+                   u.username as assignee_user_id, i.reporter, i.created_at, i.updated_at,
+                   i.labels, i.metadata
+            FROM issues i
+            LEFT JOIN issue_users u ON u.id = i.assignee_user_id
+            WHERE i.key = %s
         """, (key,))
         
         row = cur.fetchone()
@@ -266,7 +268,7 @@ def api_issue_detail(key):
             'description': row[2],
             'status': row[3],
             'priority': row[4],
-            'assignee_agent': row[5],
+            'assignee_user_id': row[5],
             'reporter': row[6],
             'created_at': row[7].isoformat() if row[7] else None,
             'updated_at': row[8].isoformat() if row[8] else None,
