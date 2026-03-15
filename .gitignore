@@ -4,3 +4,4 @@ __pycache__/
 .env
 .claude/
 .lgd-nfy0
+*.log

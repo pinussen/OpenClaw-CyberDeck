@@ -296,7 +296,7 @@ def api_update_issue(key):
     """Update issue fields"""
     data = request.get_json()
     
-    valid_fields = {'status', 'priority', 'title', 'assignee_agent', 'labels'}
+    valid_fields = {'status', 'priority', 'title', 'assignee_agent', 'assignee_user_id', 'labels'}
     updates = {}
     for field in valid_fields:
         if field in data:
@@ -306,6 +306,16 @@ def api_update_issue(key):
         return jsonify({'ok': False, 'error': 'No valid fields to update'}), 400
     
     with get_db().cursor() as cur:
+        # Handle assignee_user_id - convert username to UUID if needed
+        if 'assignee_user_id' in updates and updates['assignee_user_id']:
+            user_val = updates['assignee_user_id']
+            # If it looks like a username (not a UUID), look up the UUID
+            if '-' not in str(user_val):
+                cur.execute("SELECT id FROM issue_users WHERE username = %s", (user_val,))
+                row = cur.fetchone()
+                if row:
+                    updates['assignee_user_id'] = str(row[0])
+        
         # Update issue
         set_clause = ', '.join([f"{k} = %s" for k in updates.keys()])
         params = list(updates.values()) + [key]
