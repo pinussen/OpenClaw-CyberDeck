@@ -367,10 +367,10 @@
                 }
             });
             
-            // Render orphaned children (children whose parent isn't in the list)
-            const orphanedChildren = children.filter(c => !parents.find(p => p.key === c.parent_key));
+            // Render orphaned children (children whose parent isn't in the list or is closed)
+            const orphanedChildren = sortedIssues.filter(c => c.parent_key && !processedParents.has(c.parent_key));
             if (orphanedChildren.length > 0) {
-                if (parents.length > 0) html += '<div style="margin: 15px 0; border-bottom: 1px dashed #333;"></div>';
+                if (processedParents.size > 0) html += '<div style="margin: 15px 0; border-bottom: 1px dashed #333;"></div>';
                 orphanedChildren.forEach(child => {
                     html += renderIssueItem(child, false, false);
                 });
