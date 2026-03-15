@@ -177,7 +177,7 @@ def dashboard_summary():
             LEFT JOIN issue_users u ON u.id = i.assignee_user_id
             WHERE i.status IN ('todo', 'in_progress', 'blocked')
             ORDER BY i.created_at DESC
-            LIMIT 5
+            LIMIT 20
         """)
         
         recent = []
@@ -226,7 +226,7 @@ def api_issues():
             query += " WHERE priority = %s"
             params.append(priority)
         
-        query += " ORDER BY created_at DESC LIMIT 50"
+        query += " ORDER BY created_at DESC LIMIT 200"
         
         cur.execute(query, params)
         
