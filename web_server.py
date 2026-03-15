@@ -155,6 +155,47 @@ def dashboard():
     """Render cyberdeck dashboard with issues overview."""
     return render_template('dashboard.html')
 
+@app.route('/issues/<key>/edit')
+def edit_issue(key):
+    """Render edit page for issue."""
+    return render_template('edit.html')
+
+@app.route('/api/dashboard/summary')
+def dashboard_summary():
+    """Get dashboard summary"""
+    with get_db().cursor() as cur:
+        cur.execute("""
+            SELECT COUNT(*) FROM issues 
+            WHERE status IN ('todo', 'in_progress', 'blocked')
+        """)
+        open_count = cur.fetchone()[0]
+        
+        cur.execute("""
+            SELECT key, title, status, priority, labels, assignee_agent
+            FROM issues 
+            WHERE status IN ('todo', 'in_progress', 'blocked')
+            ORDER BY created_at DESC
+            LIMIT 5
+        """)
+        
+        recent = []
+        for row in cur.fetchall():
+            recent.append({
+                'key': row[0],
+                'title': row[1],
+                'status': row[2],
+                'priority': row[3],
+                'labels': row[4] or [],
+                'assignee': row[5]
+            })
+        
+        return jsonify({
+            'ok': True,
+            'summary': {'total_issues': open_count},
+            'recent_issues': recent
+        })
+
+
 # Issues routes
 @app.route('/issues')
 def issues():
@@ -229,20 +270,22 @@ def api_issue_detail(key):
             'metadata': row[10] or {}
         }
         
-        # Get events
+        # Get events - join with issues to get UUID from key
         cur.execute("""
-            SELECT event_type, content, created_at
-            FROM issue_events
-            WHERE issue_key = %s
-            ORDER BY created_at DESC
+            SELECT e.id, e.event_type, e.payload as content, e.created_at
+            FROM issue_events e
+            JOIN issues i ON i.id = e.issue_id
+            WHERE i.key = %s
+            ORDER BY e.created_at DESC
         """, (key,))
         
         events = []
         for row in cur.fetchall():
             events.append({
-                'type': row[0],
-                'content': row[1],
-                'created_at': row[2].isoformat() if row[2] else None
+                'id': row[0],
+                'type': row[1],
+                'content': row[2],
+                'created_at': row[3].isoformat() if row[3] else None
             })
         
         issue['events'] = events
@@ -294,11 +337,51 @@ def api_add_comment(key):
     
     with get_db().cursor() as cur:
         cur.execute("""
-            INSERT INTO issue_events (issue_key, event_type, content)
-            VALUES (%s, %s, %s)
-        """, (key, 'comment', comment))
+            INSERT INTO issue_events (issue_id, event_type, payload)
+            SELECT id, %s, %s::jsonb FROM issues WHERE key = %s
+        """, ('comment', json.dumps({"text": comment}), key))
     
     return jsonify({'ok': True, 'message': 'Comment added'})
+
+@app.route('/api/issues/<key>/comment/<int:event_id>', methods=['PUT', 'POST'])
+def api_update_comment(key, event_id):
+    """Update existing comment"""
+    data = request.get_json()
+    new_text = data.get('comment', '').strip()
+    
+    if not new_text:
+        return jsonify({'ok': False, 'error': 'No comment text'}), 400
+    
+    with get_db().cursor() as cur:
+        # Verify the event belongs to this issue and is a comment
+        cur.execute("""
+            UPDATE issue_events e
+            SET payload = jsonb_set(payload, '{text}', %s::jsonb)
+            FROM issues i
+            WHERE e.id = %s AND e.event_type = 'comment'
+            AND e.issue_id = i.id AND i.key = %s
+        """, (json.dumps(new_text), event_id, key))
+        
+        if cur.rowcount == 0:
+            return jsonify({'ok': False, 'error': 'Comment not found'}), 404
+    
+    return jsonify({'ok': True, 'message': 'Comment updated'})
+
+@app.route('/api/issues/<key>/comment/<int:event_id>', methods=['DELETE'])
+def api_delete_comment(key, event_id):
+    """Delete a comment"""
+    with get_db().cursor() as cur:
+        cur.execute("""
+            DELETE FROM issue_events e
+            USING issues i
+            WHERE e.id = %s AND e.event_type = 'comment'
+            AND e.issue_id = i.id AND i.key = %s
+        """, (event_id, key))
+        
+        if cur.rowcount == 0:
+            return jsonify({'ok': False, 'error': 'Comment not found'}), 404
+    
+    return jsonify({'ok': True, 'message': 'Comment deleted'})
 
 @app.route('/api/issues/create', methods=['POST'])
 def api_create_issue():

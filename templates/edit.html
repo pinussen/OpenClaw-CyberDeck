@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redigera Ärende</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #0a0a0a;
+            --card: rgba(255,255,255,0.05);
+            --text: #e0e0e0;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1a2e 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .logo {
+            font-size: 2em;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        h1 { color: var(--primary); font-size: 1.5em; }
+        
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover { opacity: 0.9; }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-danger {
+            background: transparent;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+        
+        .btn-small {
+            padding: 5px 12px;
+            font-size: 0.85em;
+        }
+        
+        .form-card {
+            background: var(--card);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,255,136,0.5);
+            border-radius: 5px;
+            padding: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .message.success {
+            background: rgba(0,255,136,0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .message.error {
+            background: rgba(255,68,68,0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0,255,136,0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Comments Section */
+        .section-title {
+            color: var(--primary);
+            font-size: 1.2em;
+            margin: 30px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0,255,136,0.3);
+        }
+        
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .comment {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,255,136,0.15);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .comment:hover {
+            border-color: rgba(0,255,136,0.3);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        
+        .comment-type {
+            background: rgba(0,255,136,0.15);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            text-transform: uppercase;
+        }
+        
+        .comment-content {
+            color: var(--text);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .comment-content.editing {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--primary);
+        }
+        
+        .comment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .comment-form {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,255,136,0.2);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .comment-form h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/dashboard" class="logo">🦾</a>
+            <h1>✏️ Redigera <span id="issueKey"></span></h1>
+            <a href="/issues" class="btn btn-secondary">Tillbaka</a>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Laddar ärende...</p>
+        </div>
+        
+        <form id="editForm" style="display: none;">
+            <div class="form-card">
+                <div class="form-group">
+                    <label for="title">Titel</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Beskrivning</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="todo">Att göra</option>
+                            <option value="in_progress">Pågående</option>
+                            <option value="blocked">Blockerad</option>
+                            <option value="review">Granskning</option>
+                            <option value="done">Klar</option>
+                            <option value="cancelled">Avbruten</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priority">Prioritet</label>
+                        <select id="priority" name="priority">
+                            <option value="low">Låg</option>
+                            <option value="medium">Medel</option>
+                            <option value="high">Hög</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assignee_agent">Tilldelad agent</label>
+                    <select id="assignee_agent" name="assignee_agent">
+                        <option value="">-- Välj agent --</option>
+                        <option value="coding">coding</option>
+                        <option value="architect">architect</option>
+                        <option value="ops">ops</option>
+                        <option value="tester">tester</option>
+                        <option value="research">research</option>
+                        <option value="garden">garden</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="labels">Etiketter (kommaseparerade)</label>
+                    <input type="text" id="labels" name="labels" placeholder="bug, feature, urgent">
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button type="submit" class="btn">💾 Spara ändringar</button>
+                <a href="/issues" class="btn btn-secondary">Avbryt</a>
+            </div>
+        </form>
+        
+        <!-- Comments Section -->
+        <h2 class="section-title">💬 Kommentarer</h2>
+        <div id="commentsList" class="comments-list">
+            <div class="empty-state">Laddar kommentarer...</div>
+        </div>
+        
+        <div class="comment-form">
+            <h3>➕ Lägg till kommentar</h3>
+            <div class="form-group">
+                <textarea id="newComment" rows="4" placeholder="Skriv din kommentar här..."></textarea>
+            </div>
+            <button onclick="addComment()" class="btn">💬 Lägg till kommentar</button>
+        </div>
+    </div>
+    
+    <script>
+        const pathParts = window.location.pathname.split('/');
+        const issueKey = pathParts[pathParts.length - 2];
+        document.getElementById('issueKey').textContent = issueKey;
+        
+        let currentEvents = [];
+        
+        async function loadIssue() {
+            try {
+                const res = await fetch(`/api/issues/${issueKey}`);
+                const data = await res.json();
+                
+                if (!data.ok) {
+                    showMessage('Kunde inte ladda ärende', 'error');
+                    return;
+                }
+                
+                const issue = data.issue;
+                currentEvents = issue.events || [];
+                
+                document.getElementById('title').value = issue.title || '';
+                document.getElementById('description').value = issue.description || '';
+                document.getElementById('status').value = issue.status || 'todo';
+                document.getElementById('priority').value = issue.priority || 'medium';
+                document.getElementById('assignee_agent').value = issue.assignee_agent || '';
+                document.getElementById('labels').value = (issue.labels || []).join(', ');
+                
+                renderComments(currentEvents);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('editForm').style.display = 'block';
+                
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+        
+        function renderComments(events) {
+            const container = document.getElementById('commentsList');
+            const comments = events.filter(e => e.type === 'comment');
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<div class="empty-state">📭 Inga kommentarer än</div>';
+                return;
+            }
+            
+            container.innerHTML = comments.map((comment, index) => {
+                const text = comment.content?.text || comment.content;
+                const date = comment.created_at ? new Date(comment.created_at).toLocaleString('sv-SE') : '';
+                const eventId = comment.id;
+                return `
+                    <div class="comment" data-id="${eventId}">
+                        <div class="comment-header">
+                            <span class="comment-type">💬 Kommentar</span>
+                            <span>${date}</span>
+                        </div>
+                        <div class="comment-content" id="comment-${eventId}">${escapeHtml(text)}</div>
+                        <div class="comment-actions">
+                            <button onclick="editComment(${eventId})" class="btn btn-secondary btn-small">✏️ Redigera</button>
+                            <button onclick="deleteComment(${eventId})" class="btn btn-danger btn-small">🗑️ Ta bort</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function addComment() {
+            const text = document.getElementById('newComment').value.trim();
+            if (!text) {
+                showMessage('Skriv en kommentar först', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/comment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: text })
+                });
+                
+                const data = await res.json();
+                if (data.ok) {
+                    document.getElementById('newComment').value = '';
+                    showMessage('✅ Kommentar tillagd!', 'success');
+                    loadIssue(); // Reload to show new comment
+                } else {
+                    showMessage('❌ ' + (data.error || 'Kunde inte lägga till'), 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function editComment(eventId) {
+            const comments = currentEvents.filter(e => e.type === 'comment');
+            const comment = currentEvents.find(e => e.id === eventId && e.type === 'comment');
+            if (!comment) return;
+            
+            const text = comment.content?.text || comment.content;
+            const contentDiv = document.getElementById(`comment-${eventId}`);
+            
+            // Replace with textarea
+            contentDiv.innerHTML = `
+                <textarea id="edit-${eventId}" rows="3" style="width: 100%; margin-bottom: 10px;">${escapeHtml(text)}</textarea>
+                <div>
+                    <button onclick="saveComment(${eventId})" class="btn btn-small">💾 Spara</button>
+                    <button onclick="cancelEdit(${eventId}, '${escapeHtml(text).replace(/'/g, "\\'")}')" class="btn btn-secondary btn-small">Avbryt</button>
+                </div>
+            `;
+            contentDiv.classList.add('editing');
+        }
+        
+        function cancelEdit(index, originalText) {
+            const contentDiv = document.getElementById(`comment-${eventId}`);
+            contentDiv.textContent = originalText;
+            contentDiv.classList.remove('editing');
+        }
+        
+        async function saveComment(eventId) {
+            const newText = document.getElementById(`edit-${eventId}`).value.trim();
+            if (!newText) {
+                showMessage('Kommentaren kan inte vara tom', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/comment/${eventId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: newText })
+                });
+                
+                const data = await res.json();
+                if (data.ok) {
+                    showMessage('✅ Kommentar uppdaterad!', 'success');
+                    loadIssue();
+                } else {
+                    showMessage('❌ ' + (data.error || 'Kunde inte uppdatera'), 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteComment(eventId) {
+            if (!confirm('Är du säker på att du vill ta bort denna kommentar?')) {
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/comment/${eventId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await res.json();
+                if (data.ok) {
+                    showMessage('✅ Kommentar borttagen!', 'success');
+                    loadIssue();
+                } else {
+                    showMessage('❌ ' + (data.error || 'Kunde inte ta bort'), 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 5000);
+        }
+        
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const labelsInput = document.getElementById('labels').value;
+            const labels = labelsInput ? labelsInput.split(',').map(l => l.trim()).filter(l => l) : [];
+            
+            const updates = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                status: document.getElementById('status').value,
+                priority: document.getElementById('priority').value,
+                assignee_agent: document.getElementById('assignee_agent').value || null,
+                labels: labels
+            };
+            
+            try {
+                const res = await fetch(`/api/issues/${issueKey}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    showMessage('✅ Ändringar sparade!', 'success');
+                } else {
+                    showMessage('❌ ' + (data.error || 'Kunde inte spara'), 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+            }
+        });
+        
+        loadIssue();
+    </script>
+</body>
+</html>
