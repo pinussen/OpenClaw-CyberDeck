@@ -533,6 +533,32 @@
             }
         }
         
+        async function loadAgents() {
+            try {
+                const res = await fetch('/api/agents');
+                const data = await res.json();
+                
+                const container = document.getElementById('agentStatus');
+                if (data.ok && data.agents.length > 0) {
+                    container.innerHTML = data.agents.map(agent => {
+                        const statusColor = agent.active ? '#00ff88' : '#ff4444';
+                        const statusDot = `<span style="color: ${statusColor}">●</span>`;
+                        const issuesBadge = agent.assigned_issues > 0 
+                            ? `<span style="background: #00ff88; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">${agent.assigned_issues}</span>` 
+                            : '';
+                        return `<div style="padding: 5px 0; border-bottom: 1px solid #333;">
+                            ${statusDot} <strong>${agent.id}</strong>${issuesBadge}
+                            <div style="font-size: 0.85em; color: #888; margin-left: 20px;">${agent.name}</div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state">📭 Inga agenter</div>';
+                }
+            } catch (error) {
+                document.getElementById('agentStatus').innerHTML = '<div style="color: #ff4444;">❌ Kunde inte ladda</div>';
+            }
+        }
+        
         async function loadQueue() {
             try {
                 const res = await fetch('/api/queue');
@@ -581,8 +607,10 @@
         // Load on init
         document.addEventListener('DOMContentLoaded', () => {
             loadQueue();
+            loadAgents();
             // Refresh every 30 seconds
             setInterval(loadQueue, 30000);
+            setInterval(loadAgents, 60000); // Agents every minute
         });
     </script>
     

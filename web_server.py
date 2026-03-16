@@ -645,6 +645,44 @@ def api_today_log():
     return jsonify({'ok': True, 'date': today, 'entries': entries[:50]})
 
 
+
+
+@app.route('/api/agents')
+def api_agents():
+    """Get agent status from issue_users"""
+    with get_db().cursor() as cur:
+        cur.execute("""
+            SELECT username, agent_id, display_name, role, active, updated_at
+            FROM issue_users
+            WHERE role = 'agent' AND active = true
+            ORDER BY agent_id
+        """)
+        agents = []
+        for row in cur.fetchall():
+            agents.append({
+                'username': row[0],
+                'id': row[1],
+                'name': row[2],
+                'role': row[3],
+                'active': row[4],
+                'last_seen': row[5].isoformat() if row[5] else None
+            })
+        
+        # Count assigned issues per agent
+        cur.execute("""
+            SELECT assignee_user_id, COUNT(*) as count
+            FROM issues
+            WHERE status IN ('todo', 'in_progress')
+            GROUP BY assignee_user_id
+        """)
+        assigned = {str(row[0]): row[1] for row in cur.fetchall()}
+        
+        for agent in agents:
+            agent['assigned_issues'] = assigned.get(agent['username'], 0)
+    
+    return jsonify({'ok': True, 'agents': agents})
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
