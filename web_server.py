@@ -649,36 +649,42 @@ def api_today_log():
 
 @app.route('/api/agents')
 def api_agents():
-    """Get agent status from issue_users"""
+    """Get agent status from issue_users with assigned issue counts"""
     with get_db().cursor() as cur:
+        # Get all active agents
         cur.execute("""
-            SELECT username, agent_id, display_name, role, active, updated_at
+            SELECT id, username, agent_id, display_name, role, active, updated_at
             FROM issue_users
             WHERE role = 'agent' AND active = true
             ORDER BY agent_id
         """)
         agents = []
+        agent_ids = {}
         for row in cur.fetchall():
+            agent_id = str(row[0])  # UUID
             agents.append({
-                'username': row[0],
-                'id': row[1],
-                'name': row[2],
-                'role': row[3],
-                'active': row[4],
-                'last_seen': row[5].isoformat() if row[5] else None
+                'uuid': agent_id,
+                'username': row[1],
+                'id': row[2],
+                'name': row[3],
+                'role': row[4],
+                'active': row[5],
+                'last_seen': row[6].isoformat() if row[6] else None,
+                'assigned_issues': 0
             })
+            agent_ids[agent_id] = len(agents) - 1
         
-        # Count assigned issues per agent
+        # Count assigned issues per agent (by UUID)
         cur.execute("""
             SELECT assignee_user_id, COUNT(*) as count
             FROM issues
             WHERE status IN ('todo', 'in_progress')
             GROUP BY assignee_user_id
         """)
-        assigned = {str(row[0]): row[1] for row in cur.fetchall()}
-        
-        for agent in agents:
-            agent['assigned_issues'] = assigned.get(agent['username'], 0)
+        for row in cur.fetchall():
+            uuid_str = str(row[0])
+            if uuid_str in agent_ids:
+                agents[agent_ids[uuid_str]]['assigned_issues'] = row[1]
     
     return jsonify({'ok': True, 'agents': agents})
 
